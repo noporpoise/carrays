@@ -30,41 +30,44 @@
 //          0 iff a == b
 //   positive iff a > b
 
-#define cmpfunc(fname,type_t)                                                  \
-static inline int fname(const void *a, const void *b) __attribute__((unused)); \
-static inline int fname(const void *a, const void *b) {                        \
-  const type_t a2 = *(const type_t *)a;                                        \
-  const type_t b2 = *(const type_t *)b;                                        \
-  return (a2 < b2 ? -1 : (a2 > b2));                                           \
+#define cmp(a,b) (a < b ? -1 : (a > b))
+#define cmpfunc(fname,type_t,cmp)                                              \
+static inline int fname(const void *aa, const void *bb) __attribute__((unused));\
+static inline int fname(const void *aa, const void *bb) {                      \
+  const type_t a = *(const type_t *)aa;                                        \
+  const type_t b = *(const type_t *)bb;                                        \
+  return cmp(a, b);                                                            \
 }
-
-cmpfunc(array_cmp_int, int);
-cmpfunc(array_cmp_long, long);
-cmpfunc(array_cmp_float, float);
-cmpfunc(array_cmp_double, double);
-cmpfunc(array_cmp_uint32, uint32_t);
-cmpfunc(array_cmp_uint64, uint64_t);
-cmpfunc(array_cmp_size, size_t);
-cmpfunc(array_cmp_ptr, void *const);
+cmpfunc(array_cmp_int,     int,         cmp);
+cmpfunc(array_cmp_long,    long,        cmp);
+cmpfunc(array_cmp_float,   float,       cmp);
+cmpfunc(array_cmp_double,  double,      cmp);
+cmpfunc(array_cmp_uint32,  uint32_t,    cmp);
+cmpfunc(array_cmp_uint64,  uint64_t,    cmp);
+cmpfunc(array_cmp_size,    size_t,      cmp);
+cmpfunc(array_cmp_ptr,     void *const, cmp);
+cmpfunc(array_cmp_charptr, char *const, strcmp);
 #undef cmpfunc
 
-#define searchfunc(fname,type_t)                                               \
-static inline int fname(const void *a, void *b) __attribute__((unused));       \
-static inline int fname(const void *a, void *b) {                              \
-  const type_t a2 = *(const type_t *)a;                                        \
-  const type_t b2 = *(type_t *)b;                                              \
-  return (a2 < b2 ? -1 : (a2 > b2));                                           \
-}
 
-searchfunc(array_search_int, int);
-searchfunc(array_search_long, long);
-searchfunc(array_search_float, float);
-searchfunc(array_search_double, double);
-searchfunc(array_search_uint32, uint32_t);
-searchfunc(array_search_uint64, uint64_t);
-searchfunc(array_search_size, size_t);
-searchfunc(array_search_ptr, void *const);
+#define searchfunc(fname,type_t,cmp)                                           \
+static inline int fname(const void *aa, void *bb) __attribute__((unused));     \
+static inline int fname(const void *aa, void *bb) {                            \
+  const type_t a = *(const type_t *)aa;                                        \
+  const type_t b = *(type_t *)bb;                                              \
+  return cmp(a, b);                                                            \
+}
+searchfunc(array_search_int,     int,         cmp);
+searchfunc(array_search_long,    long,        cmp);
+searchfunc(array_search_float,   float,       cmp);
+searchfunc(array_search_double,  double,      cmp);
+searchfunc(array_search_uint32,  uint32_t,    cmp);
+searchfunc(array_search_uint64,  uint64_t,    cmp);
+searchfunc(array_search_size,    size_t,      cmp);
+searchfunc(array_search_ptr,     void *const, cmp);
+searchfunc(array_search_charptr, char *const, strcmp);
 #undef searchfunc
+#undef cmp
 
 // Get Greatest Common Divisor using binary GCD algorithm
 // http://en.wikipedia.org/wiki/Binary_GCD_algorithm
