@@ -25,6 +25,47 @@
   #define SWAP(x,y) do { __typeof(x) _tmp = (x); (x) = (y); (y) = _tmp; } while(0)
 #endif
 
+// comparison returns:
+//   negative iff a < b
+//          0 iff a == b
+//   positive iff a > b
+
+#define cmpfunc(fname,type_t)                                                  \
+static inline int fname(const void *a, const void *b) __attribute__((unused)); \
+static inline int fname(const void *a, const void *b) {                        \
+  const type_t a2 = *(const type_t *)a;                                        \
+  const type_t b2 = *(const type_t *)b;                                        \
+  return (a2 < b2 ? -1 : (a2 > b2));                                           \
+}
+
+cmpfunc(array_cmp_int, int);
+cmpfunc(array_cmp_long, long);
+cmpfunc(array_cmp_float, float);
+cmpfunc(array_cmp_double, double);
+cmpfunc(array_cmp_uint32, uint32_t);
+cmpfunc(array_cmp_uint64, uint64_t);
+cmpfunc(array_cmp_size, size_t);
+cmpfunc(array_cmp_ptr, void *const);
+#undef cmpfunc
+
+#define searchfunc(fname,type_t)                                               \
+static inline int fname(const void *a, void *b) __attribute__((unused));       \
+static inline int fname(const void *a, void *b) {                              \
+  const type_t a2 = *(const type_t *)a;                                        \
+  const type_t b2 = *(type_t *)b;                                              \
+  return (a2 < b2 ? -1 : (a2 > b2));                                           \
+}
+
+searchfunc(array_search_int, int);
+searchfunc(array_search_long, long);
+searchfunc(array_search_float, float);
+searchfunc(array_search_double, double);
+searchfunc(array_search_uint32, uint32_t);
+searchfunc(array_search_uint64, uint64_t);
+searchfunc(array_search_size, size_t);
+searchfunc(array_search_ptr, void *const);
+#undef searchfunc
+
 // Get Greatest Common Divisor using binary GCD algorithm
 // http://en.wikipedia.org/wiki/Binary_GCD_algorithm
 uint32_t carrays_calc_GCD(uint32_t a, uint32_t b);
