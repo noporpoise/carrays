@@ -96,12 +96,9 @@ void sarrays_merge(void *_dst, size_t ndst, size_t nsrc, size_t es,
   else if(compar(dst, end-es, arg) >= 0) {
     array_cycle_left(dst, ndst, es, ndst);
   }
-  else if(ndst < nsrc && ndst < CARRAYS_ISORT_CUTOFF) {
-    // insertion sort of dst into src
-    sarrays_isortf(dst+es*ndst, nsrc, ndst, es, compar, arg);
-  } else if(nsrc < CARRAYS_ISORT_CUTOFF) {
-    // insertion sort of src into dst
-    sarrays_isortr(dst, ndst, nsrc, es, compar, arg);
+  else if(ndst+nsrc < CARRAYS_ISORT_CUTOFF) {
+    // insertion sort merge of dst and src
+    sarrays_imerge(dst, ndst, nsrc, es, compar, arg);
   }
   else {
     array_qsort_r(dst, ndst+nsrc, es, compar, arg);
@@ -143,7 +140,7 @@ void array_qsort_r(void *base, size_t nel, size_t w,
   char *b = base, *end = b + nel*w;
   if(nel < CARRAYS_ISORT_CUTOFF) {
     /* Insertion sort for small inputs */
-    sarrays_isortr(base, 0, nel, w, compar, arg);
+    arrays_isortr(base, 0, nel, w, compar, arg);
   }
   else
   {
@@ -161,6 +158,8 @@ void array_qsort_r(void *base, size_t nel, size_t w,
     // swap l[id], l[2] to put pivot as last element
     carrays_swapm(l[1], last, w);
 
+    // Keep pivot in array and not on the stack (which would speed up swaps)
+    // as this is a recursive function with possibly large elements
     char *pl = b, *pr = last;
 
     while(pl < pr) {

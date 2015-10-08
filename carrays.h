@@ -25,6 +25,8 @@
   #define SWAP(x,y) do { __typeof(x) _tmp = (x); (x) = (y); (y) = _tmp; } while(0)
 #endif
 
+// Get Greatest Common Divisor using binary GCD algorithm
+// http://en.wikipedia.org/wiki/Binary_GCD_algorithm
 uint32_t carrays_calc_GCD(uint32_t a, uint32_t b);
 
 static inline void carrays_swapm(char *a, char *b, size_t es)
@@ -58,48 +60,72 @@ void* sarray_bsearch(void *_ptr, size_t n, size_t es,
                      int (*compar)(const void *_val, void *_arg),
                      void *arg);
 
-/**
- * Insertion sort (right to left)
- * @param ptr points to sorted array
- * @param n is number of sorted elements
- * @param m is number of unsorted elements AFTER ptr+n sorted to merge in
- * @param el is element size
- * @param compar is comparison function
- */
-static inline void sarrays_isortr(void *_ptr, size_t n, size_t m, size_t el,
-                                  int (*compar)(const void *_a, const void *_b,
-                                                void *_arg),
-                                  void *arg)
-{
-  char *b = (char*)_ptr, *pi, *pj, *end = b+el*(n+m);
-  for(pi = b+el*n; pi < end; pi += el)
-    for(pj = pi; pj > b && compar(pj-el,pj,arg); pj -= el)
-      carrays_swapm(pj-el, pj, el);
-}
-
-/**
- * Insertion sort (left to right)
- * @param ptr points to sorted array
- * @param n is number of sorted elements
- * @param m is number of unsorted elements BEFORE ptr
- * @param el is element size
- * @param compar is comparison function
- */
-static inline void sarrays_isortf(void *_ptr, size_t n, size_t m, size_t el,
-                                  int (*compar)(const void *_a, const void *_b,
-                                                void *_arg),
-                                  void *arg)
-{
-  char *b = (char*)_ptr, *pi, *pj, *start = b-el*m, *end = b+el*n;
-  for(pi = b; pi > start; pi -= el)
-    for(pj = pi; pj < end && compar(pj-el, pj, arg); pj += el)
-      carrays_swapm(pj-el, pj, el);
-}
-
 // Quick sort
 // Note: quicksort is not stable, equivalent values may be swapped
 void array_qsort_r(void *base, size_t nel, size_t w,
                    int (*compar)(const void *_a, const void *_b, void *_arg),
                    void *arg);
+
+/**
+ * Insertion sort, sorted elements first, then unsorted
+ * @param ptr points to sorted array
+ * @param n is number of sorted elements
+ * @param m is number of unsorted elements AFTER ptr+n sorted to merge in
+ * @param el is element size
+ * @param compar is comparison function
+ * @param arg is pointer to pass to comparison function
+ */
+static inline void arrays_isortr(void *_ptr, size_t n, size_t m, size_t el,
+                                 int (*compar)(const void *_a, const void *_b,
+                                               void *_arg),
+                                 void *arg)
+{
+  char *b = (char*)_ptr, *pi, *pj, *end = b+el*(n+m);
+  for(pi = b+el*n; pi < end; pi += el)
+    for(pj = pi; pj > b && compar(pj-el,pj,arg) > 0; pj -= el)
+      carrays_swapm(pj-el, pj, el);
+}
+
+/**
+ * Insertion sort unsorted elements first, then sorted
+ * @param ptr points to sorted array
+ * @param n is number of sorted elements
+ * @param m is number of unsorted elements BEFORE ptr
+ * @param el is element size
+ * @param compar is comparison function
+ * @param arg is pointer to pass to comparison function
+ */
+static inline void arrays_isortf(void *_ptr, size_t n, size_t m, size_t el,
+                                 int (*compar)(const void *_a, const void *_b,
+                                               void *_arg),
+                                 void *arg)
+{
+  char *b = (char*)_ptr, *pi, *pj, *start = b-el*m, *end = b+el*n;
+  for(pi = b; pi > start; pi -= el)
+    for(pj = pi; pj < end && compar(pj-el, pj, arg) > 0; pj += el)
+      carrays_swapm(pj-el, pj, el);
+}
+
+/**
+ * Insertion sort merging between two adjacent sorted arrays
+ * @param ptr points to array
+ * @param n is number of sorted elements
+ * @param m is number of sorted elements
+ * @param el is element size
+ * @param compar is comparison function
+ * @param arg is pointer to pass to comparison function
+ */
+static inline void sarrays_imerge(void *_ptr, size_t n, size_t m, size_t el,
+                                  int (*compar)(const void *_a, const void *_b,
+                                                void *_arg),
+                                  void *arg)
+{
+  char *b = (char*)_ptr, *pi, *pj, *end = b+el*(n+m);
+  for(pi = b+el*n; pi < end; pi += el) {
+    for(pj = pi; pj > b && compar(pj-el,pj,arg) > 0; pj -= el)
+      carrays_swapm(pj-el, pj, el);
+    if(pj == pi) break;
+  }
+}
 
 #endif /* CARRAYS_H_ */

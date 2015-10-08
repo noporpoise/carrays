@@ -4,11 +4,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "carrays.h"
 
 //
 // Generic circular array
 //
+
+#ifndef roundup64
+  #define roundup64(x) roundup64(x)
+  static inline uint64_t roundup64(uint64_t x) {
+    return (--x, x|=x>>1, x|=x>>2, x|=x>>4, x|=x>>8, x|=x>>16, x|=x>>32, ++x);
+  }
+#endif
 
 typedef struct
 {
@@ -29,8 +35,8 @@ static inline void circa_alloc(CircArray *l, size_t el, size_t size)
 {
   size = roundup64(size);
   CircArray tmp = {.el = el, .start = 0, .n = 0,
-                .size = size, .mask = size-1,
-                .b = malloc(size * el)};
+                   .size = size, .mask = size-1,
+                   .b = malloc(size * el)};
   memcpy(l, &tmp, sizeof(CircArray));
 }
 

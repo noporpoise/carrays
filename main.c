@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include "carrays.h"
 #include "circ_array.h"
+#include "carrays.h"
 
 size_t num_tests_run = 0, num_tests_failed = 0;
 
@@ -153,6 +153,32 @@ void test_reverse()
   }
 }
 
+
+int _search_int(const void *aa, void *bb)
+{
+  int a = *(const int*)aa, b = *(int*)bb;
+  return a < b ? -1 : (a > b);
+}
+
+void test_bsearch()
+{
+  status("Testing bsearch()");
+  int i, n, find, arr[100];
+  void *ptr;
+  for(i = 0; i < 100; i++) arr[i] = i;
+
+  find = 20;
+  ptr = sarray_bsearch(arr, 100, sizeof(arr[0]), _search_int, &find);
+  TASSERT(ptr == &arr[find]);
+
+  for(n = 0; n < 100; n++) {
+    for(find = -2; find <= n+2; find++) {
+      ptr = sarray_bsearch(arr, n, sizeof(arr[0]), _search_int, &find);
+      TASSERT(ptr == (find < 0 || find >= n ? NULL : &arr[find]));
+    }
+  }
+}
+
 int main()
 {
   status("Running tests...");
@@ -160,6 +186,7 @@ int main()
   test_GCD();
   test_array_cycle();
   test_reverse();
+  test_bsearch();
   status("Done.");
 
   return num_tests_failed ? -1 : 0;
