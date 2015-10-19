@@ -30,7 +30,8 @@
 //          0 iff a == b
 //   positive iff a > b
 
-#define cmp(a,b) (a < b ? -1 : (a > b))
+// #define cmp(a,b) (a < b ? -1 : (a > b))
+#define cmp(a,b) (((a) > (b)) - ((b) > (a)))
 #define cmpfunc(fname,type_t,cmp)                                              \
 static inline int fname(const void *aa, const void *bb) __attribute__((unused));\
 static inline int fname(const void *aa, const void *bb) {                      \

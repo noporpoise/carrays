@@ -5,6 +5,8 @@
 #include <string.h>
 #include <assert.h>
 
+#include "carrays.h"
+
 //
 // Generic circular array
 //
@@ -30,6 +32,7 @@ static inline void* circa_push(CircArray *l) __attribute__((unused));
 static inline void* circa_pop(CircArray *l) __attribute__((unused));
 static inline void* circa_unshift(CircArray *l) __attribute__((unused));
 static inline void* circa_shift(CircArray *l) __attribute__((unused));
+static inline void circa_norm(CircArray *l) __attribute__((unused));
 
 static inline void circa_alloc(CircArray *l, size_t el, size_t size)
 {
@@ -66,7 +69,8 @@ static inline void circa_capacity(CircArray *l, size_t size)
   if(size > l->size) circa_resize(l, roundup64(size));
 }
 
-#define circa_get(l,idx) ((l)->b[(l)->el * (((l)->start + (idx)) & (l)->mask)])
+#define circa_pos(l,idx) (((l)->start + (idx)) & (l)->mask)
+#define circa_get(l,idx) ((l)->b + (l)->el * circa_pos(l,idx))
 
 // Add to start
 // Returns a pointer to the item added (zero'd)
@@ -75,7 +79,7 @@ static inline void* circa_push(CircArray *l)
   if(l->n == l->size) circa_resize(l, l->size*2);
   l->start = l->start ? l->start-1 : l->size-1;
   l->n++;
-  void *ptr = &circa_get(l, 0);
+  void *ptr = circa_get(l, 0);
   memset(ptr, 0, l->el);
   return ptr;
 }
@@ -96,7 +100,7 @@ static inline void* circa_pop(CircArray *l)
 static inline void* circa_unshift(CircArray *l)
 {
   if(l->n == l->size) circa_resize(l, l->size*2);
-  void *ptr = &circa_get(l, l->n);
+  void *ptr = circa_get(l, l->n);
   memset(ptr, 0, l->el);
   l->n++;
   return ptr;
@@ -107,9 +111,28 @@ static inline void* circa_unshift(CircArray *l)
 static inline void* circa_shift(CircArray *l)
 {
   assert(l->n > 0);
-  void *ptr = &circa_get(l, l->n);
+  void *ptr = circa_get(l, l->n);
   l->n--;
   return ptr;
+}
+
+// Stop circular array from wrapping around
+static inline void circa_norm(CircArray *l)
+{
+  size_t newstart, nright, nleft;
+  if(l->start + l->n > l->size) {
+    newstart = (l->size - l->n) / 2; // pick a new start
+    nleft = l->start + l->n - l->size;
+    nright = l->size - l->start;
+    if(nleft <= newstart) {
+      memmove(l->b+newstart, l->b+l->start, l->el * nright);
+      memcpy(l->b+newstart+nright, l->b, l->el * nleft);
+    } else {
+      // memset(l->b+nleft, 0, l->el*(l->size-l->n)); // silence valgrind warning
+      array_cycle_left(l->b, l->size, l->el, l->start-newstart);
+    }
+    l->start = newstart;
+  }
 }
 
 #endif /* CIRC_ARRAY_H_ */
