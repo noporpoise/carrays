@@ -188,9 +188,9 @@ void array_qsort_r(void *base, size_t nel, size_t w,
 // Heapsort
 //
 
-void array_mk_heap(void *base, size_t nel, size_t es,
-                   int (*compar)(const void *_a, const void *_b, void *_arg),
-                   void *arg)
+void array_heap_make(void *base, size_t nel, size_t es,
+                     int (*compar)(const void *_a, const void *_b, void *_arg),
+                     void *arg)
 {
   char *b = (char*)base;
   size_t chi, pi, n;
@@ -210,7 +210,7 @@ void array_mk_heap(void *base, size_t nel, size_t es,
 }
 
 // ar[idx]: child1 => arr[2*idx+1], child2 => arr[2*idx+2]
-void array_sort_heap(void *heap, size_t nel, size_t es,
+void array_heap_sort(void *heap, size_t nel, size_t es,
                      int (*compar)(const void *_a, const void *_b, void *_arg),
                      void *arg)
 {

@@ -123,11 +123,11 @@ void array_qsort_r(void *base, size_t nel, size_t es,
 #define array_heap_child1(idx) (2*(idx)+1)
 #define array_heap_child2(idx) (2*(idx)+2)
 
-void array_mk_heap(void *base, size_t nel, size_t es,
-                   int (*compar)(const void *_a, const void *_b, void *_arg),
-                   void *arg);
+void array_heap_make(void *base, size_t nel, size_t es,
+                     int (*compar)(const void *_a, const void *_b, void *_arg),
+                     void *arg);
 
-void array_sort_heap(void *heap, size_t nel, size_t es,
+void array_heap_sort(void *heap, size_t nel, size_t es,
                      int (*compar)(const void *_a, const void *_b, void *_arg),
                      void *arg);
 

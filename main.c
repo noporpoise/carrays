@@ -181,8 +181,8 @@ void test_heapsort()
   for(j = 0; j < N; j++) arr[j] = j;
 
   for(i = 0; i < 50; i++) {
-    array_mk_heap(arr, N, sizeof(arr[0]), array_cmp2_int, NULL);
-    array_sort_heap(arr, N, sizeof(arr[0]), array_cmp2_int, NULL);
+    array_heap_make(arr, N, sizeof(arr[0]), array_cmp2_int, NULL);
+    array_heap_sort(arr, N, sizeof(arr[0]), array_cmp2_int, NULL);
     for(j = 0; j < N && arr[j] == j; j++) {}
     TASSERT(j == N);
     array_shuffle(arr, N, sizeof(arr[0]));
