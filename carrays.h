@@ -32,22 +32,30 @@
 
 // #define cmp(a,b) (a < b ? -1 : (a > b))
 #define cmp(a,b) (((a) > (b)) - ((b) > (a)))
-#define cmpfunc(fname,type_t,cmp)                                              \
+#define cmpfunc(fname,fname2,type_t,cmp)                                       \
 static inline int fname(const void *aa, const void *bb) __attribute__((unused));\
 static inline int fname(const void *aa, const void *bb) {                      \
   const type_t a = *(const type_t *)aa;                                        \
   const type_t b = *(const type_t *)bb;                                        \
   return cmp(a, b);                                                            \
+}                                                                              \
+static inline int fname2(const void *aa, const void *bb, void *p)              \
+  __attribute__((unused));                                                     \
+static inline int fname2(const void *aa, const void *bb, void *p) {            \
+  (void)p;                                                                     \
+  const type_t a = *(const type_t *)aa;                                        \
+  const type_t b = *(const type_t *)bb;                                        \
+  return cmp(a, b);                                                            \
 }
-cmpfunc(array_cmp_int,     int,         cmp);
-cmpfunc(array_cmp_long,    long,        cmp);
-cmpfunc(array_cmp_float,   float,       cmp);
-cmpfunc(array_cmp_double,  double,      cmp);
-cmpfunc(array_cmp_uint32,  uint32_t,    cmp);
-cmpfunc(array_cmp_uint64,  uint64_t,    cmp);
-cmpfunc(array_cmp_size,    size_t,      cmp);
-cmpfunc(array_cmp_ptr,     void *const, cmp);
-cmpfunc(array_cmp_charptr, char *const, strcmp);
+cmpfunc(array_cmp_int,     array_cmp2_int,     int,         cmp);
+cmpfunc(array_cmp_long,    array_cmp2_long,    long,        cmp);
+cmpfunc(array_cmp_float,   array_cmp2_float,   float,       cmp);
+cmpfunc(array_cmp_double,  array_cmp2_double,  double,      cmp);
+cmpfunc(array_cmp_uint32,  array_cmp2_uint32,  uint32_t,    cmp);
+cmpfunc(array_cmp_uint64,  array_cmp2_uint64,  uint64_t,    cmp);
+cmpfunc(array_cmp_size,    array_cmp2_size,    size_t,      cmp);
+cmpfunc(array_cmp_ptr,     array_cmp2_ptr,     void *const, cmp);
+cmpfunc(array_cmp_charptr, array_cmp2_charptr, char *const, strcmp);
 #undef cmpfunc
 
 
@@ -107,9 +115,25 @@ void* sarray_bsearch(void *_ptr, size_t n, size_t es,
 
 // Quick sort
 // Note: quicksort is not stable, equivalent values may be swapped
-void array_qsort_r(void *base, size_t nel, size_t w,
+void array_qsort_r(void *base, size_t nel, size_t es,
                    int (*compar)(const void *_a, const void *_b, void *_arg),
                    void *arg);
+
+#define array_heap_parent(idx) (((idx)-1)/2)
+#define array_heap_child1(idx) (2*(idx)+1)
+#define array_heap_child2(idx) (2*(idx)+2)
+
+void array_mk_heap(void *base, size_t nel, size_t es,
+                   int (*compar)(const void *_a, const void *_b, void *_arg),
+                   void *arg);
+
+void array_sort_heap(void *heap, size_t nel, size_t es,
+                     int (*compar)(const void *_a, const void *_b, void *_arg),
+                     void *arg);
+
+// To heapsort:
+//   array_mk_heap()
+//   array_sort_heap()
 
 /**
  * Insertion sort, sorted elements first, then unsorted

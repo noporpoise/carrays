@@ -183,3 +183,45 @@ void array_qsort_r(void *base, size_t nel, size_t w,
     array_qsort_r(pl+w, (end-(pl+w))/w, w, compar, arg);
   }
 }
+
+//
+// Heapsort
+//
+
+void array_mk_heap(void *base, size_t nel, size_t es,
+                   int (*compar)(const void *_a, const void *_b, void *_arg),
+                   void *arg)
+{
+  char *b = (char*)base;
+  size_t chi, pi, n;
+  // add elements one-at-a-time to the end
+  for(n = 1; n < nel; n++)
+  {
+    // push up the tree
+    for(chi = n; chi > 0; chi = pi) {
+      pi = array_heap_parent(chi);
+      if(compar(b+es*pi, b+es*chi, arg) >= 0) break;
+      carrays_swapm(b+es*pi, b+es*chi, es);
+    }
+  }
+}
+
+// ar[idx]: child1 => arr[2*idx+1], child2 => arr[2*idx+2]
+void array_sort_heap(void *heap, size_t nel, size_t es,
+                     int (*compar)(const void *_a, const void *_b, void *_arg),
+                     void *arg)
+{
+  if(nel <= 1) return;
+  char *b = (char*)heap, *last, *p, *ch;
+  // take elements off the top one at a time, by swapping first and last
+  for(last = b+es*(nel-1); last > b; last -= es)
+  {
+    carrays_swapm(b, last, es); // swap into index zero
+    // push down the tree
+    for(p = b, ch = b+es; ch < last; p = ch, ch = b + 2*(ch-b) + es) {
+      ch = (ch+es < last && compar(ch,ch+es,arg) < 0 ? ch+es : ch); // biggest child
+      if(compar(p,ch,arg) >= 0) break;
+      carrays_swapm(p, ch, es);
+    }
+  }
+}

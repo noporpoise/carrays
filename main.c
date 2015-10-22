@@ -64,7 +64,7 @@ void test_round()
 
 void test_GCD()
 {
-  status("Testing carrays_calc_GCD()");
+  status("Testing calculating GCD...");
 
   size_t i;
   for(i = 0; i < 100; i++) {
@@ -133,7 +133,7 @@ void _test_array_cycle(size_t *arr, size_t n)
 
 void test_array_cycle()
 {
-  status("Testing array_cycle_left() / array_cycle_right()");
+  status("Testing array cycle left/right...");
   size_t n, arr[100];
 
   // Test all array lengths up to 100
@@ -143,7 +143,7 @@ void test_array_cycle()
 
 void test_reverse()
 {
-  status("Testing array_reverse()");
+  status("Testing array reverse...");
   size_t i, n, tmp[100];
   for(n = 0; n < 100; n++) {
     for(i = 0; i < n; i++) tmp[i] = i;
@@ -155,7 +155,7 @@ void test_reverse()
 
 void test_bsearch()
 {
-  status("Testing sarray_bsearch()");
+  status("Testing binary search...");
   int i, n, find, arr[100];
   void *ptr;
   for(i = 0; i < 100; i++) arr[i] = i;
@@ -172,6 +172,24 @@ void test_bsearch()
   }
 }
 
+void test_heapsort()
+{
+  status("Testing heapsort...");
+
+  #define N 1000
+  int i, j, arr[N];
+  for(j = 0; j < N; j++) arr[j] = j;
+
+  for(i = 0; i < 50; i++) {
+    array_mk_heap(arr, N, sizeof(arr[0]), array_cmp2_int, NULL);
+    array_sort_heap(arr, N, sizeof(arr[0]), array_cmp2_int, NULL);
+    for(j = 0; j < N && arr[j] == j; j++) {}
+    TASSERT(j == N);
+    array_shuffle(arr, N, sizeof(arr[0]));
+  }
+  #undef N
+}
+
 int main()
 {
   status("Running tests...");
@@ -180,6 +198,7 @@ int main()
   test_array_cycle();
   test_reverse();
   test_bsearch();
+  test_heapsort();
   status("Passed: %zu / %zu (%s)", num_tests_run-num_tests_failed, num_tests_run,
          !num_tests_failed ? "all" : (num_tests_failed<num_tests_run ? "some" : "none"));
   status("Done.");
