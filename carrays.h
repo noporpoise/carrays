@@ -2,6 +2,8 @@
 #define CARRAYS_H_
 
 #include <stdlib.h>
+#include <inttypes.h>
+#include <stdbool.h>
 
 //
 // Arrays
@@ -82,9 +84,9 @@ searchfunc(array_search_charptr, char *const, strcmp);
 // http://en.wikipedia.org/wiki/Binary_GCD_algorithm
 uint32_t carrays_calc_GCD(uint32_t a, uint32_t b);
 
-static inline void carrays_swapm(char *a, char *b, size_t es)
+static inline void carrays_swapm(void *aa, void *bb, size_t es)
 {
-  char *end, tmp;
+  char *end, *a = (char*)aa, *b = (char*)bb, tmp;
   for(end = a + es; a < end; a++, b++) { tmp = *a; *a = *b; *b = tmp; }
 }
 
@@ -105,7 +107,10 @@ void sarrays_merge(void *_dst, size_t ndst, size_t nsrc, size_t es,
                    int (*compar)(const void *_a, const void *_b, void *_arg),
                    void *arg);
 
+//
 // binary search
+//
+
 // compar is a function that compares a given value with the value we are
 // searching for. It returns <0 if _val is < target, >0 if _val is > target,
 // 0 otherwise.
@@ -113,11 +118,30 @@ void* sarray_bsearch(void *_ptr, size_t n, size_t es,
                      int (*compar)(const void *_val, void *_arg),
                      void *arg);
 
+//
 // Quick sort
-// Note: quicksort is not stable, equivalent values may be swapped
-void array_qsort_r(void *base, size_t nel, size_t es,
+//
+
+// Quicksort Partition 
+// Pivot is in first index
+// returns index of pivot after partitioning
+size_t array_qpart(void *base, size_t nel, size_t es,
                    int (*compar)(const void *_a, const void *_b, void *_arg),
                    void *arg);
+
+// Note: quicksort is not stable, equivalent values may be swapped
+void array_qsort(void *base, size_t nel, size_t es,
+                 int (*compar)(const void *_a, const void *_b, void *_arg),
+                 void *arg);
+
+// Get k largest from unsorted array, uising quickselect
+void array_qselect(void *base, size_t nel, size_t es, size_t kidx,
+                   int (*compar)(const void *_a, const void *_b, void *_arg),
+                   void *arg);
+
+//
+// Heapsort
+//
 
 #define array_heap_parent(idx) (((idx)-1)/2)
 #define array_heap_child1(idx) (2*(idx)+1)
@@ -131,9 +155,15 @@ void array_heap_sort(void *heap, size_t nel, size_t es,
                      int (*compar)(const void *_a, const void *_b, void *_arg),
                      void *arg);
 
-// To heapsort:
-//   array_mk_heap()
-//   array_sort_heap()
+//
+// To heapsort an array:
+//   array_heap_make(...)
+//   array_heap_sort(...)
+//
+
+//
+// Insertion sort
+//
 
 /**
  * Insertion sort, sorted elements first, then unsorted
@@ -195,6 +225,33 @@ static inline void sarrays_imerge(void *_ptr, size_t n, size_t m, size_t el,
       carrays_swapm(pj-el, pj, el);
     if(pj == pi) break;
   }
+}
+
+//
+// Check if an array is sorted
+//
+static inline bool array_is_sorted(void *base, size_t nel, size_t es,
+                                   int (*compar)(const void *_a, const void *_b,
+                                                void *_arg),
+                                   void *arg)
+{
+  char *b = (char*)base, *end = b+es*nel, *ptr;
+  for(ptr = b; ptr+es < end; ptr += es)
+    if(compar(ptr, ptr+es, arg) > 0)
+      return false;
+  return true;
+}
+
+static inline bool array_is_rsorted(void *base, size_t nel, size_t es,
+                                    int (*compar)(const void *_a, const void *_b,
+                                                  void *_arg),
+                                    void *arg)
+{
+  char *b = (char*)base, *end = b+es*nel, *ptr;
+  for(ptr = b; ptr+es < end; ptr += es)
+    if(compar(ptr, ptr+es, arg) < 0)
+      return false;
+  return true;
 }
 
 #endif /* CARRAYS_H_ */

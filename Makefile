@@ -1,6 +1,10 @@
 
 CFLAGS=-Wall -Wextra -O3
 
+ifdef DEBUG
+	CFLAGS:=-g $(CFLAGS)
+endif
+
 all: runtest
 
 runtest: main.c carrays.c carrays.h circ_array.h

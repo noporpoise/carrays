@@ -1,4 +1,5 @@
 #include <string.h>
+#include <assert.h>
 #include "carrays.h"
 
 // Get Greatest Common Divisor using binary GCD algorithm
@@ -71,14 +72,14 @@ void array_reverse(void *_ptr, size_t n, size_t es)
   for(; a < b; a += es, b -= es) carrays_swapm(a, b, es);
 }
 
-// Fisher-Yates shuffle. Initiate srand() before calling.
+// Fisher-Yates shuffle. Initiate srand48() before calling.
 void array_shuffle(void *_ptr, size_t n, size_t es)
 {
   if(n <= 1 || !es) return;
   char *ptr = (char*)_ptr;
   size_t i, j;
-  for(i = n-1; i != SIZE_MAX; i--) {
-    j = ((size_t)rand()*(i+1))/RAND_MAX; // rand between 0,i inclusive
+  for(i = n-1; i > 0; i--) {
+    j = drand48() * (i+1); // rand between 0,i inclusive
     carrays_swapm(ptr+es*i, ptr+es*j, es);
   }
 }
@@ -101,7 +102,7 @@ void sarrays_merge(void *_dst, size_t ndst, size_t nsrc, size_t es,
     sarrays_imerge(dst, ndst, nsrc, es, compar, arg);
   }
   else {
-    array_qsort_r(dst, ndst+nsrc, es, compar, arg);
+    array_qsort(dst, ndst+nsrc, es, compar, arg);
   }
 }
 
@@ -131,58 +132,122 @@ void* sarray_bsearch(void *_ptr, size_t n, size_t es,
   return NULL;
 }
 
+//
 // Quick sort
-// Note: quicksort is not stable, equivalent values may be swapped
-void array_qsort_r(void *base, size_t nel, size_t w,
+//
+
+// Quicksort Partition
+// Pivot is in first index
+// returns index of pivot after partitioning
+size_t array_qpart(void *base, size_t nel, size_t es,
                    int (*compar)(const void *_a, const void *_b, void *_arg),
                    void *arg)
 {
-  char *b = base, *end = b + nel*w;
+  if(nel <= 1) return 0;
+  char pivot[es], *b = (char*)base, *pl = b, *pr = b+es*(nel-1);
+  memcpy(pivot, b, es);
+  // hole at pl
+
+  while(pl < pr) {
+    for(; pl < pr; pr -= es) {
+      if(compar(pr, pivot, arg) < 0) {
+        memcpy(pl, pr, es);
+        pl += es; /* hole now at pr */
+        break;
+      }
+    }
+    for(; pl < pr; pl += es) {
+      if(compar(pl, pivot, arg) > 0) {
+        memcpy(pr, pl, es);
+        pr -= es; /* hole now at pl */
+        break;
+      }
+    }
+  }
+  // now pl == pr
+  memcpy(pl, pivot, es);
+  return (pl-b)/es;
+}
+
+// Get pointer to median of first, middle and last elements
+static inline char* median3(char *b, size_t nel, size_t es,
+                            int (*compar)(const void *_a, const void *_b,
+                                          void *_arg),
+                            void *arg)
+{
+  char *p[3] = {b, b+es*(nel/2), b+es*(nel-1)};
+  if(compar(p[0],p[1],arg) > 0) { SWAP(p[0], p[1]); }
+  if(compar(p[1],p[2],arg) > 0) {
+    SWAP(p[1], p[2]);
+    if(compar(p[0],p[1],arg) > 0) { SWAP(p[0], p[1]); }
+  }
+  return p[1];
+}
+
+// Note: quicksort is not stable, equivalent values may be swapped
+void array_qsort(void *base, size_t nel, size_t es,
+                 int (*compar)(const void *_a, const void *_b, void *_arg),
+                 void *arg)
+{
+  char *b = (char*)base;
+
   if(nel < CARRAYS_ISORT_CUTOFF) {
     /* Insertion sort for small inputs */
-    arrays_isortr(base, 0, nel, w, compar, arg);
+    arrays_isortr(base, 0, nel, es, compar, arg);
   }
   else
   {
     /* nel >= 6; Quicksort */
 
     /* Use median of first, middle and last items as pivot */
-    char *last = b+w*(nel-1);
-    char *l[3] = {b, b+w*(nel/2), last};
-    if(compar(l[0],l[1],arg) > 0) { SWAP(l[0], l[1]); }
-    if(compar(l[1],l[2],arg) > 0) {
-      SWAP(l[1], l[2]);
-      if(compar(l[0],l[1],arg) > 0) { SWAP(l[0], l[1]); }
-    }
+    char *pivot = median3(b, nel, es, compar, arg);
 
-    // swap l[id], l[2] to put pivot as last element
-    carrays_swapm(l[1], last, w);
+    // swap pivot into first element and partition
+    carrays_swapm(b, pivot, es);
+    size_t pidx = array_qpart(b, nel, es, compar, arg);
 
-    // Keep pivot in array and not on the stack (which would speed up swaps)
-    // as this is a recursive function with possibly large elements
-    char *pl = b, *pr = last;
-
-    while(pl < pr) {
-      for(; pl < pr; pl += w) {
-        if(compar(pl, pr, arg) > 0) {
-          carrays_swapm(pl, pr, w);
-          pr -= w; /* pivot now at pl */
-          break;
-        }
-      }
-      for(; pl < pr; pr -= w) {
-        if(compar(pl, pr, arg) > 0) {
-          carrays_swapm(pl, pr, w);
-          pl += w; /* pivot now at pr */
-          break;
-        }
-      }
-    }
-
-    array_qsort_r(b, (pl-b)/w, w, compar, arg);
-    array_qsort_r(pl+w, (end-(pl+w))/w, w, compar, arg);
+    array_qsort(b, pidx, es, compar, arg);
+    array_qsort(b+es*(pidx+1), nel-(pidx+1), es, compar, arg);
   }
 }
+
+//
+// Quickselect
+//
+
+// Get k-th element from unsorted array, uising quickselect
+void array_qselect(void *base, size_t nel, size_t es, size_t kidx,
+                   int (*compar)(const void *_a, const void *_b, void *_arg),
+                   void *arg)
+{
+  char *b = (char*)base;
+  size_t pidx, l = 0, r = nel-1;
+
+  assert(kidx < nel);
+  if(nel <= 1) return;
+
+  while(1)
+  {
+    /* Use median of first, middle and last items as pivot */
+    char *pivot = median3(b+es*l, r-l+1, es, compar, arg);
+
+    // swap pivot into first element and partition
+    carrays_swapm(b+es*l, pivot, es);
+    pidx = l + array_qpart(b+es*l, r-l+1, es, compar, arg);
+
+    if(pidx > kidx) r = pidx-1;
+    else if(pidx < kidx) l = pidx+1;
+    else break;
+  }
+}
+
+// Get k-th element from unsorted array, using quickselect and median of medians
+// void array_qselect_mmed(void *base, size_t nel, size_t es, size_t kidx,
+//                         int (*compar)(const void *_a, const void *_b, void *_arg),
+//                         void *arg)
+// {
+  
+// }
 
 //
 // Heapsort

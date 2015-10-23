@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 #include "circ_array.h"
 #include "carrays.h"
 
@@ -144,48 +145,169 @@ void test_array_cycle()
 void test_reverse()
 {
   status("Testing array reverse...");
-  size_t i, n, tmp[100];
-  for(n = 0; n < 100; n++) {
+
+  #define N 100
+  size_t i, n, tmp[N];
+  for(n = 0; n <= N; n++) {
     for(i = 0; i < n; i++) tmp[i] = i;
     array_reverse(tmp, n, sizeof(tmp[0]));
     for(i = 0; i < n && tmp[i] == n-i-1; i++) {}
     TASSERT(i == n);
   }
+  #undef N
 }
 
 void test_bsearch()
 {
   status("Testing binary search...");
-  int i, n, find, arr[100];
+
+  #define N 100
+  int i, n, find, arr[N];
   void *ptr;
-  for(i = 0; i < 100; i++) arr[i] = i;
+  for(i = 0; i < N; i++) arr[i] = i;
 
   find = 20;
-  ptr = sarray_bsearch(arr, 100, sizeof(arr[0]), array_search_int, &find);
+  ptr = sarray_bsearch(arr, N, sizeof(arr[0]), array_search_int, &find);
   TASSERT(ptr == &arr[find]);
 
-  for(n = 0; n < 100; n++) {
+  for(n = 0; n <= N; n++) {
     for(find = -2; find <= n+2; find++) {
       ptr = sarray_bsearch(arr, n, sizeof(arr[0]), array_search_int, &find);
       TASSERT(ptr == (find < 0 || find >= n ? NULL : &arr[find]));
     }
   }
+  #undef N
+}
+
+void test_quicksort()
+{
+  status("Testing quicksort...");
+
+  #define N 100
+  size_t i, j, n, arr[N];
+
+  // Try different array lengths
+  for(n = 0; n <= N; n++)
+  {
+    // start with reverse sorted array
+    for(i = 0; i < n; i++) arr[i] = n-1-i;
+    array_qsort(arr, n, sizeof(arr[0]), array_cmp2_size, NULL);
+    TASSERT(array_is_sorted(arr, n, sizeof(arr[0]), array_cmp2_size, NULL));
+
+    // start with sorted array
+    for(i = 0; i < n; i++) arr[i] = i;
+    array_qsort(arr, n, sizeof(arr[0]), array_cmp2_size, NULL);
+    TASSERT(array_is_sorted(arr, n, sizeof(arr[0]), array_cmp2_size, NULL));
+
+    // shuffle the array first
+    for(j = 0; j < 100; j++) {
+      array_shuffle(arr, n, sizeof(arr[0]));
+      array_qsort(arr, n, sizeof(arr[0]), array_cmp2_size, NULL);
+      TASSERT(array_is_sorted(arr, n, sizeof(arr[0]), array_cmp2_size, NULL));
+    }
+  }
+
+  #undef N
+}
+
+// check partition around pivot
+bool check_qpart(size_t *arr, size_t n, size_t pidx)
+{
+  size_t i = 0;
+  for(i = 0; i < pidx; i++)
+    if(arr[i] > arr[pidx]) return false;
+  for(i = pidx+1; i < n; i++)
+    if(arr[i] < arr[pidx]) return false;
+  return true;
+}
+
+void test_quickpartition()
+{
+  status("Testing quickpartition...");
+
+  #define N 100
+  size_t i, n, arr[N], p;
+  for(i = 0; i < N; i++) arr[i] = i;
+
+  for(n = 0; n <= N; n++) {
+    array_shuffle(arr, n, sizeof(arr[0]));
+    for(i = 0; i < n; i++) {
+      p = arr[i];
+      carrays_swapm(&arr[0], &arr[i], sizeof(arr[0]));
+      array_qpart(arr, n, sizeof(arr[0]), array_cmp2_size, NULL);
+      TASSERT(arr[p] == p);
+      TASSERT(check_qpart(arr, n, p));
+    }
+  }
+  #undef N
+}
+
+void test_quickselect()
+{
+  status("Testing quickselect...");
+
+  #define N 10
+  size_t i, n, arr[N], pos[N];
+  for(i = 0; i < N; i++) pos[i] = i;
+
+  for(n = 0; n <= N; n++)
+  {
+    // Create shuffled array of positions
+    array_shuffle(pos, n, sizeof(pos[0]));
+    // check all positions are <n (this is a test of array_shuffle())
+    for(i = 0; i < n && pos[i] < n; i++) {}
+    TASSERT(i == n);
+
+    // Initialise array to 0..n-1
+    for(i = 0; i < n; i++) arr[i] = i;
+
+    // Check we can select each index without changing the array
+    for(i = 0; i < n; i++) {
+      array_qselect(arr, n, sizeof(arr[0]), i, array_cmp2_size, NULL);
+      TASSERT(array_is_sorted(arr, n, sizeof(arr[0]), array_cmp2_size, NULL));
+    }
+
+    // shuffle and check
+    for(i = 0; i < n; i++) {
+      array_qselect(arr, n, sizeof(arr[0]), pos[i], array_cmp2_size, NULL);
+      TASSERT(check_qpart(arr, n, pos[i]));
+    }
+    // Should now be sorted after pivoting on each index
+    TASSERT(array_is_sorted(arr, n, sizeof(arr[0]), array_cmp2_size, NULL));
+  }
+
+  #undef N
 }
 
 void test_heapsort()
 {
   status("Testing heapsort...");
 
-  #define N 1000
-  int i, j, arr[N];
-  for(j = 0; j < N; j++) arr[j] = j;
+  #define N 200
+  int i, j, n, arr[N];
 
-  for(i = 0; i < 50; i++) {
-    array_heap_make(arr, N, sizeof(arr[0]), array_cmp2_int, NULL);
-    array_heap_sort(arr, N, sizeof(arr[0]), array_cmp2_int, NULL);
-    for(j = 0; j < N && arr[j] == j; j++) {}
-    TASSERT(j == N);
-    array_shuffle(arr, N, sizeof(arr[0]));
+  // Try different array lengths
+  for(n = 0; n <= N; n++)
+  {
+    // start with sorted array
+    for(j = 0; j < n; j++) arr[j] = j;
+    array_heap_make(arr, n, sizeof(arr[0]), array_cmp2_int, NULL);
+    array_heap_sort(arr, n, sizeof(arr[0]), array_cmp2_int, NULL);
+    TASSERT(array_is_sorted(arr, n, sizeof(arr[0]), array_cmp2_int, NULL));
+
+    // start with reverse sorted array
+    for(j = 0; j < n; j++) arr[j] = n-1-j;
+    array_heap_make(arr, n, sizeof(arr[0]), array_cmp2_int, NULL);
+    array_heap_sort(arr, n, sizeof(arr[0]), array_cmp2_int, NULL);
+    TASSERT(array_is_sorted(arr, n, sizeof(arr[0]), array_cmp2_int, NULL));
+
+    // start with a shuffled array
+    for(i = 0; i < 10; i++) {
+      array_shuffle(arr, n, sizeof(arr[0]));
+      array_heap_make(arr, n, sizeof(arr[0]), array_cmp2_int, NULL);
+      array_heap_sort(arr, n, sizeof(arr[0]), array_cmp2_int, NULL);
+      TASSERT(array_is_sorted(arr, n, sizeof(arr[0]), array_cmp2_int, NULL));
+    }
   }
   #undef N
 }
@@ -198,6 +320,9 @@ int main()
   test_array_cycle();
   test_reverse();
   test_bsearch();
+  test_quicksort();
+  test_quickpartition();
+  test_quickselect();
   test_heapsort();
   status("Passed: %zu / %zu (%s)", num_tests_run-num_tests_failed, num_tests_run,
          !num_tests_failed ? "all" : (num_tests_failed<num_tests_run ? "some" : "none"));
