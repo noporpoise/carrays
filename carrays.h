@@ -162,6 +162,25 @@ void array_heap_sort(void *heap, size_t nel, size_t es,
 //
 
 //
+// Median
+//
+
+// Get pointer to median of three elements
+void* array_median3(void *p0, void *p1, void *p2,
+                    int (*compar)(const void *_a, const void *_b, void *_arg),
+                    void *arg);
+
+// Get pointer to median of five elements
+void* array_median5(void *p0, void *p1, void *p2, void *p3, void *p4,
+                    int (*compar)(const void *_a, const void *_b, void *_arg),
+                    void *arg);
+
+//
+// Permutations
+//
+// size_t array_permutation();
+
+//
 // Insertion sort
 //
 

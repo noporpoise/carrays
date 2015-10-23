@@ -312,6 +312,172 @@ void test_heapsort()
   #undef N
 }
 
+#define perm(x,a,b,c,d,e) do { x[0]=(a);x[1]=(b);x[2]=(c);x[3]=(d);x[4]=(e); }while(0)
+
+static inline void check_median(size_t *arr, size_t ans)
+{
+  size_t i, tmp;
+  char *ptr = array_median5(&arr[0], &arr[1], &arr[2], &arr[3], &arr[4],
+                            array_cmp2_size, NULL);
+  memcpy(&tmp, ptr, sizeof(tmp));
+  TASSERT(tmp == ans);
+  if(tmp != ans) {
+    for(i = 0; i < 5; i++) printf(" %zu", arr[i]);
+    printf("\n");
+  }
+}
+
+
+void test_median5()
+{
+  size_t arr[5], m = 2;
+
+  // 5*4*3*2 = 120 perumations
+  perm(arr,0,1,2,3,4); check_median(arr,m);
+  perm(arr,0,1,2,4,3); check_median(arr,m);
+  perm(arr,0,1,3,2,4); check_median(arr,m);
+  perm(arr,0,1,3,4,2); check_median(arr,m);
+  perm(arr,0,1,4,2,3); check_median(arr,m);
+  perm(arr,0,1,4,3,2); check_median(arr,m);
+
+  perm(arr,0,2,1,3,4); check_median(arr,m);
+  perm(arr,0,2,1,4,3); check_median(arr,m);
+  perm(arr,0,2,3,1,4); check_median(arr,m);
+  perm(arr,0,2,3,4,1); check_median(arr,m);
+  perm(arr,0,2,4,1,3); check_median(arr,m);
+  perm(arr,0,2,4,3,1); check_median(arr,m);
+
+  perm(arr,0,3,1,2,4); check_median(arr,m);
+  perm(arr,0,3,1,4,2); check_median(arr,m);
+  perm(arr,0,3,2,1,4); check_median(arr,m);
+  perm(arr,0,3,2,4,1); check_median(arr,m);
+  perm(arr,0,3,4,1,2); check_median(arr,m);
+  perm(arr,0,3,4,2,1); check_median(arr,m);
+
+  perm(arr,0,4,1,2,3); check_median(arr,m);
+  perm(arr,0,4,1,3,2); check_median(arr,m);
+  perm(arr,0,4,2,1,3); check_median(arr,m);
+  perm(arr,0,4,2,3,1); check_median(arr,m);
+  perm(arr,0,4,3,1,2); check_median(arr,m);
+  perm(arr,0,4,3,2,1); check_median(arr,m);
+
+  //
+  perm(arr,1,0,2,3,4); check_median(arr,m);
+  perm(arr,1,0,2,4,3); check_median(arr,m);
+  perm(arr,1,0,3,2,4); check_median(arr,m);
+  perm(arr,1,0,3,4,2); check_median(arr,m);
+  perm(arr,1,0,4,2,3); check_median(arr,m);
+  perm(arr,1,0,4,3,2); check_median(arr,m);
+
+  perm(arr,1,2,0,3,4); check_median(arr,m);
+  perm(arr,1,2,0,4,3); check_median(arr,m);
+  perm(arr,1,2,3,0,4); check_median(arr,m);
+  perm(arr,1,2,3,4,0); check_median(arr,m);
+  perm(arr,1,2,4,0,3); check_median(arr,m);
+  perm(arr,1,2,4,3,0); check_median(arr,m);
+
+  perm(arr,1,3,0,2,4); check_median(arr,m);
+  perm(arr,1,3,0,4,2); check_median(arr,m);
+  perm(arr,1,3,2,0,4); check_median(arr,m);
+  perm(arr,1,3,2,4,0); check_median(arr,m);
+  perm(arr,1,3,4,0,2); check_median(arr,m);
+  perm(arr,1,3,4,2,0); check_median(arr,m);
+
+  perm(arr,1,4,0,2,3); check_median(arr,m);
+  perm(arr,1,4,0,3,2); check_median(arr,m);
+  perm(arr,1,4,2,0,3); check_median(arr,m);
+  perm(arr,1,4,2,3,0); check_median(arr,m);
+  perm(arr,1,4,3,0,2); check_median(arr,m);
+  perm(arr,1,4,3,2,0); check_median(arr,m);
+
+  //
+  perm(arr,2,0,1,3,4); check_median(arr,m);
+  perm(arr,2,0,1,4,3); check_median(arr,m);
+  perm(arr,2,0,3,1,4); check_median(arr,m);
+  perm(arr,2,0,3,4,1); check_median(arr,m);
+  perm(arr,2,0,4,1,3); check_median(arr,m);
+  perm(arr,2,0,4,3,1); check_median(arr,m);
+
+  perm(arr,2,1,0,3,4); check_median(arr,m);
+  perm(arr,2,1,0,4,3); check_median(arr,m);
+  perm(arr,2,1,3,0,4); check_median(arr,m);
+  perm(arr,2,1,3,4,0); check_median(arr,m);
+  perm(arr,2,1,4,0,3); check_median(arr,m);
+  perm(arr,2,1,4,3,0); check_median(arr,m);
+
+  perm(arr,2,3,0,1,4); check_median(arr,m);
+  perm(arr,2,3,0,4,1); check_median(arr,m);
+  perm(arr,2,3,1,0,4); check_median(arr,m);
+  perm(arr,2,3,1,4,0); check_median(arr,m);
+  perm(arr,2,3,4,0,1); check_median(arr,m);
+  perm(arr,2,3,4,1,0); check_median(arr,m);
+
+  perm(arr,2,4,0,1,3); check_median(arr,m);
+  perm(arr,2,4,0,3,1); check_median(arr,m);
+  perm(arr,2,4,1,0,3); check_median(arr,m);
+  perm(arr,2,4,1,3,0); check_median(arr,m);
+  perm(arr,2,4,3,0,1); check_median(arr,m);
+  perm(arr,2,4,3,1,0); check_median(arr,m);
+
+  //
+  perm(arr,3,0,1,2,4); check_median(arr,m);
+  perm(arr,3,0,1,4,2); check_median(arr,m);
+  perm(arr,3,0,2,1,4); check_median(arr,m);
+  perm(arr,3,0,2,4,1); check_median(arr,m);
+  perm(arr,3,0,4,1,2); check_median(arr,m);
+  perm(arr,3,0,4,2,1); check_median(arr,m);
+
+  perm(arr,3,1,0,2,4); check_median(arr,m);
+  perm(arr,3,1,0,4,2); check_median(arr,m);
+  perm(arr,3,1,2,0,4); check_median(arr,m);
+  perm(arr,3,1,2,4,0); check_median(arr,m);
+  perm(arr,3,1,4,0,2); check_median(arr,m);
+  perm(arr,3,1,4,2,0); check_median(arr,m);
+
+  perm(arr,3,2,0,1,4); check_median(arr,m);
+  perm(arr,3,2,0,4,1); check_median(arr,m);
+  perm(arr,3,2,1,0,4); check_median(arr,m);
+  perm(arr,3,2,1,4,0); check_median(arr,m);
+  perm(arr,3,2,4,0,1); check_median(arr,m);
+  perm(arr,3,2,4,1,0); check_median(arr,m);
+
+  perm(arr,3,4,0,1,2); check_median(arr,m);
+  perm(arr,3,4,0,2,1); check_median(arr,m);
+  perm(arr,3,4,1,0,2); check_median(arr,m);
+  perm(arr,3,4,1,2,0); check_median(arr,m);
+  perm(arr,3,4,2,0,1); check_median(arr,m);
+  perm(arr,3,4,2,1,0); check_median(arr,m);
+
+  //
+  perm(arr,4,0,1,2,3); check_median(arr,m);
+  perm(arr,4,0,1,3,2); check_median(arr,m);
+  perm(arr,4,0,2,1,3); check_median(arr,m);
+  perm(arr,4,0,2,3,1); check_median(arr,m);
+  perm(arr,4,0,3,1,2); check_median(arr,m);
+  perm(arr,4,0,3,2,1); check_median(arr,m);
+
+  perm(arr,4,1,0,2,3); check_median(arr,m);
+  perm(arr,4,1,0,3,2); check_median(arr,m);
+  perm(arr,4,1,2,0,3); check_median(arr,m);
+  perm(arr,4,1,2,3,0); check_median(arr,m);
+  perm(arr,4,1,3,0,2); check_median(arr,m);
+  perm(arr,4,1,3,2,0); check_median(arr,m);
+
+  perm(arr,4,2,0,1,3); check_median(arr,m);
+  perm(arr,4,2,0,3,1); check_median(arr,m);
+  perm(arr,4,2,1,0,3); check_median(arr,m);
+  perm(arr,4,2,1,3,0); check_median(arr,m);
+  perm(arr,4,2,3,0,1); check_median(arr,m);
+  perm(arr,4,2,3,1,0); check_median(arr,m);
+
+  perm(arr,4,3,0,1,2); check_median(arr,m);
+  perm(arr,4,3,0,2,1); check_median(arr,m);
+  perm(arr,4,3,1,0,2); check_median(arr,m);
+  perm(arr,4,3,1,2,0); check_median(arr,m);
+  perm(arr,4,3,2,0,1); check_median(arr,m);
+  perm(arr,4,3,2,1,0); check_median(arr,m);
+}
+
 int main()
 {
   status("Running tests...");
@@ -324,6 +490,7 @@ int main()
   test_quickpartition();
   test_quickselect();
   test_heapsort();
+  test_median5();
   status("Passed: %zu / %zu (%s)", num_tests_run-num_tests_failed, num_tests_run,
          !num_tests_failed ? "all" : (num_tests_failed<num_tests_run ? "some" : "none"));
   status("Done.");

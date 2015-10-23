@@ -169,21 +169,6 @@ size_t array_qpart(void *base, size_t nel, size_t es,
   return (pl-b)/es;
 }
 
-// Get pointer to median of first, middle and last elements
-static inline char* median3(char *b, size_t nel, size_t es,
-                            int (*compar)(const void *_a, const void *_b,
-                                          void *_arg),
-                            void *arg)
-{
-  char *p[3] = {b, b+es*(nel/2), b+es*(nel-1)};
-  if(compar(p[0],p[1],arg) > 0) { SWAP(p[0], p[1]); }
-  if(compar(p[1],p[2],arg) > 0) {
-    SWAP(p[1], p[2]);
-    if(compar(p[0],p[1],arg) > 0) { SWAP(p[0], p[1]); }
-  }
-  return p[1];
-}
-
 // Note: quicksort is not stable, equivalent values may be swapped
 void array_qsort(void *base, size_t nel, size_t es,
                  int (*compar)(const void *_a, const void *_b, void *_arg),
@@ -200,7 +185,7 @@ void array_qsort(void *base, size_t nel, size_t es,
     /* nel >= 6; Quicksort */
 
     /* Use median of first, middle and last items as pivot */
-    char *pivot = median3(b, nel, es, compar, arg);
+    char *pivot = array_median3(b, b+es*(nel/2), b+es*(nel-1), compar, arg);
 
     // swap pivot into first element and partition
     carrays_swapm(b, pivot, es);
@@ -229,7 +214,7 @@ void array_qselect(void *base, size_t nel, size_t es, size_t kidx,
   while(1)
   {
     /* Use median of first, middle and last items as pivot */
-    char *pivot = median3(b+es*l, r-l+1, es, compar, arg);
+    char *pivot = array_median3(b+es*l, b+es*(l+(r-l+1)/2), b+es*r, compar, arg);
 
     // swap pivot into first element and partition
     carrays_swapm(b+es*l, pivot, es);
@@ -246,7 +231,6 @@ void array_qselect(void *base, size_t nel, size_t es, size_t kidx,
 //                         int (*compar)(const void *_a, const void *_b, void *_arg),
 //                         void *arg)
 // {
-  
 // }
 
 //
@@ -294,5 +278,50 @@ void array_heap_sort(void *heap, size_t nel, size_t es,
       memcpy(p, ch, es);
     }
     memcpy(p, tmp, es);
+  }
+}
+
+//
+// Median
+//
+
+// Get pointer to median of three elements
+void* array_median3(void *p0, void *p1, void *p2,
+                    int (*compar)(const void *_a, const void *_b, void *_arg),
+                    void *arg)
+{
+  if(compar(p0, p1, arg) > 0) SWAP(p0, p1);
+  if(compar(p1, p2, arg) > 0) {
+    SWAP(p1, p2);
+    if(compar(p0, p1, arg) > 0) SWAP(p0, p1);
+  }
+  return p1;
+}
+
+// Get pointer to median of five elements
+void* array_median5(void *p0, void *p1, void *p2, void *p3, void *p4,
+                    int (*compar)(const void *_a, const void *_b, void *_arg),
+                    void *arg)
+{
+  // make p0<p1
+  if(compar(p0, p1, arg) > 0) SWAP(p0, p1);
+  // make p2<p3
+  if(compar(p2, p3, arg) > 0) SWAP(p2, p3);
+
+  // get rid of min(min(p0,p1),min(p2,p3)),
+  // overwrite with p4
+  // make p0<p1, p2<p3 again
+  if(compar(p0, p2, arg) < 0) {
+    p0 = p4;
+    if(compar(p0, p1, arg) > 0) SWAP(p0, p1);
+  } else {
+    p2 = p4;
+    if(compar(p2, p3, arg) > 0) SWAP(p2, p3);
+  }
+
+  if(compar(p0, p2, arg) < 0) {
+    return (compar(p1, p2, arg) < 0 ? p1 : p2);
+  } else {
+    return (compar(p3, p0, arg) < 0 ? p3 : p0);
   }
 }
