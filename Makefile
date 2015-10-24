@@ -5,15 +5,15 @@ ifdef DEBUG
 	CFLAGS:=-g $(CFLAGS)
 endif
 
-all: runtest
+all: runtests
 
-runtest: main.c carrays.c carrays.h circ_array.h
-	$(CC) $(CFLAGS) -o $@ main.c carrays.c
+runtests: runtests.c carrays.c carrays.h circ_array.h
+	$(CC) $(CFLAGS) -o $@ runtests.c carrays.c
 
-test: runtest
-	./runtest
+test: runtests
+	./runtests
 
 clean:
-	rm -rf runtest
+	rm -rf runtests
 
 .PHONY: all clean test
