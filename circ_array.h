@@ -129,7 +129,7 @@ static inline void circa_norm(CircArray *l)
       memcpy(l->b+newstart+nright, l->b, l->el * nleft);
     } else {
       // memset(l->b+nleft, 0, l->el*(l->size-l->n)); // silence valgrind warning
-      array_cycle_left(l->b, l->size, l->el, l->start-newstart);
+      gca_cycle_left(l->b, l->size, l->el, l->start-newstart);
     }
     l->start = newstart;
   }

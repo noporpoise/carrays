@@ -41,25 +41,25 @@ void test_round()
 
   uint64_t i;
 
-  TASSERT(roundup32(0) == 0 && roundup64(0) == 0);
-  TASSERT(roundup32(1) == 1 && roundup64(1) == 1);
-  TASSERT(roundup32(2) == 2 && roundup64(2) == 2);
-  TASSERT(roundup32(3) == 4 && roundup64(3) == 4);
-  TASSERT(roundup32(4) == 4 && roundup64(4) == 4);
-  TASSERT(roundup32(5) == 8 && roundup64(5) == 8);
-  TASSERT(roundup32(6) == 8 && roundup64(6) == 8);
-  TASSERT(roundup32(7) == 8 && roundup64(7) == 8);
-  TASSERT(roundup32(8) == 8 && roundup64(8) == 8);
-  TASSERT(roundup32(100) == 128 && roundup64(100) == 128);
+  TASSERT(gca_roundup32(0) == 0 && gca_roundup64(0) == 0);
+  TASSERT(gca_roundup32(1) == 1 && gca_roundup64(1) == 1);
+  TASSERT(gca_roundup32(2) == 2 && gca_roundup64(2) == 2);
+  TASSERT(gca_roundup32(3) == 4 && gca_roundup64(3) == 4);
+  TASSERT(gca_roundup32(4) == 4 && gca_roundup64(4) == 4);
+  TASSERT(gca_roundup32(5) == 8 && gca_roundup64(5) == 8);
+  TASSERT(gca_roundup32(6) == 8 && gca_roundup64(6) == 8);
+  TASSERT(gca_roundup32(7) == 8 && gca_roundup64(7) == 8);
+  TASSERT(gca_roundup32(8) == 8 && gca_roundup64(8) == 8);
+  TASSERT(gca_roundup32(100) == 128 && gca_roundup64(100) == 128);
 
   for(i = 2; i < 32; i++) {
-    TASSERT(roundup32((1U<<i)-1) == (1U<<i));
-    TASSERT(roundup32(1U<<i) == (1U<<i));
+    TASSERT(gca_roundup32((1U<<i)-1) == (1U<<i));
+    TASSERT(gca_roundup32(1U<<i) == (1U<<i));
   }
 
   for(i = 2; i < 64; i++) {
-    TASSERT(roundup64((1UL<<i)-1) == (1UL<<i));
-    TASSERT(roundup64(1UL<<i) == (1UL<<i));
+    TASSERT(gca_roundup64((1UL<<i)-1) == (1UL<<i));
+    TASSERT(gca_roundup64(1UL<<i) == (1UL<<i));
   }
 }
 
@@ -69,33 +69,33 @@ void test_GCD()
 
   size_t i;
   for(i = 0; i < 100; i++) {
-    TASSERT(carrays_calc_GCD(i,i) == i);
-    TASSERT(carrays_calc_GCD(i,0) == i);
-    TASSERT(carrays_calc_GCD(0,i) == i);
-    TASSERT(carrays_calc_GCD(i,1) == 1);
-    TASSERT(carrays_calc_GCD(1,i) == 1);
+    TASSERT(gca_calc_GCD(i,i) == i);
+    TASSERT(gca_calc_GCD(i,0) == i);
+    TASSERT(gca_calc_GCD(0,i) == i);
+    TASSERT(gca_calc_GCD(i,1) == 1);
+    TASSERT(gca_calc_GCD(1,i) == 1);
   }
 
-  TASSERT(carrays_calc_GCD(2,4) == 2);
-  TASSERT(carrays_calc_GCD(4,2) == 2);
-  TASSERT(carrays_calc_GCD(6,9) == 3);
-  TASSERT(carrays_calc_GCD(9,6) == 3);
-  TASSERT(carrays_calc_GCD(0,0) == 0);
-  TASSERT(carrays_calc_GCD(10,0) == 10);
-  TASSERT(carrays_calc_GCD(0,10) == 10);
-  TASSERT(carrays_calc_GCD(2,2) == 2);
-  TASSERT(carrays_calc_GCD(1,1) == 1);
-  TASSERT(carrays_calc_GCD(1,2) == 1);
-  TASSERT(carrays_calc_GCD(1,100) == 1);
-  TASSERT(carrays_calc_GCD(2,4) == 2);
-  TASSERT(carrays_calc_GCD(7,5) == 1);
-  TASSERT(carrays_calc_GCD(18,6) == 6);
-  TASSERT(carrays_calc_GCD(3,6) == 3);
-  TASSERT(carrays_calc_GCD(100,120) == 20);
-  TASSERT(carrays_calc_GCD(100,125) == 25);
+  TASSERT(gca_calc_GCD(2,4) == 2);
+  TASSERT(gca_calc_GCD(4,2) == 2);
+  TASSERT(gca_calc_GCD(6,9) == 3);
+  TASSERT(gca_calc_GCD(9,6) == 3);
+  TASSERT(gca_calc_GCD(0,0) == 0);
+  TASSERT(gca_calc_GCD(10,0) == 10);
+  TASSERT(gca_calc_GCD(0,10) == 10);
+  TASSERT(gca_calc_GCD(2,2) == 2);
+  TASSERT(gca_calc_GCD(1,1) == 1);
+  TASSERT(gca_calc_GCD(1,2) == 1);
+  TASSERT(gca_calc_GCD(1,100) == 1);
+  TASSERT(gca_calc_GCD(2,4) == 2);
+  TASSERT(gca_calc_GCD(7,5) == 1);
+  TASSERT(gca_calc_GCD(18,6) == 6);
+  TASSERT(gca_calc_GCD(3,6) == 3);
+  TASSERT(gca_calc_GCD(100,120) == 20);
+  TASSERT(gca_calc_GCD(100,125) == 25);
 }
 
-void _test_array_cycle(size_t *arr, size_t n)
+void _test_cycle(size_t *arr, size_t n)
 {
   size_t shift, i;
 
@@ -103,43 +103,43 @@ void _test_array_cycle(size_t *arr, size_t n)
   for(i = 0; i < n; i++) arr[i] = i;
 
   // cycle left by 0, n, 2n, ... should all return input
-  array_cycle_left(arr, n, sizeof(size_t), 0);
+  gca_cycle_left(arr, n, sizeof(size_t), 0);
   for(i = 0; i < n; i++) TASSERT(arr[i] == i);
-  array_cycle_left(arr, n, sizeof(size_t), n);
+  gca_cycle_left(arr, n, sizeof(size_t), n);
   for(i = 0; i < n; i++) TASSERT(arr[i] == i);
-  array_cycle_left(arr, n, sizeof(size_t), 2*n);
+  gca_cycle_left(arr, n, sizeof(size_t), 2*n);
   for(i = 0; i < n; i++) TASSERT(arr[i] == i);
-  array_cycle_left(arr, n, sizeof(size_t), 3*n);
+  gca_cycle_left(arr, n, sizeof(size_t), 3*n);
   for(i = 0; i < n; i++) TASSERT(arr[i] == i);
 
   // cycle right by 0, n, 2n, ... should all return input
-  array_cycle_right(arr, n, sizeof(size_t), 0);
+  gca_cycle_right(arr, n, sizeof(size_t), 0);
   for(i = 0; i < n; i++) TASSERT(arr[i] == i);
-  array_cycle_right(arr, n, sizeof(size_t), n);
+  gca_cycle_right(arr, n, sizeof(size_t), n);
   for(i = 0; i < n; i++) TASSERT(arr[i] == i);
-  array_cycle_right(arr, n, sizeof(size_t), 2*n);
+  gca_cycle_right(arr, n, sizeof(size_t), 2*n);
   for(i = 0; i < n; i++) TASSERT(arr[i] == i);
-  array_cycle_right(arr, n, sizeof(size_t), 3*n);
+  gca_cycle_right(arr, n, sizeof(size_t), 3*n);
   for(i = 0; i < n; i++) TASSERT(arr[i] == i);
 
   for(shift = 0; shift < n; shift++) {
     for(i = 0; i < n; i++) arr[i] = i;
-    array_cycle_left(arr, n, sizeof(size_t), shift);
+    gca_cycle_left(arr, n, sizeof(size_t), shift);
     for(i = 0; i < n; i++) TASSERT(arr[i] == ((i+shift) % n));
     // shift back
-    array_cycle_right(arr, n, sizeof(size_t), shift);
+    gca_cycle_right(arr, n, sizeof(size_t), shift);
     for(i = 0; i < n; i++) TASSERT(arr[i] == i);
   }
 }
 
-void test_array_cycle()
+void test_cycle()
 {
   status("Testing array cycle left/right...");
   size_t n, arr[100];
 
   // Test all array lengths up to 100
   for(n = 0; n < 100; n++)
-    _test_array_cycle(arr, n);
+    _test_cycle(arr, n);
 }
 
 void test_reverse()
@@ -150,7 +150,7 @@ void test_reverse()
   size_t i, n, tmp[N];
   for(n = 0; n <= N; n++) {
     for(i = 0; i < n; i++) tmp[i] = i;
-    array_reverse(tmp, n, sizeof(tmp[0]));
+    gca_reverse(tmp, n, sizeof(tmp[0]));
     for(i = 0; i < n && tmp[i] == n-i-1; i++) {}
     TASSERT(i == n);
   }
@@ -167,12 +167,12 @@ void test_bsearch()
   for(i = 0; i < N; i++) arr[i] = i;
 
   find = 20;
-  ptr = sarray_bsearch(arr, N, sizeof(arr[0]), array_search_int, &find);
+  ptr = gca_bsearch(arr, N, sizeof(arr[0]), gca_search_int, &find);
   TASSERT(ptr == &arr[find]);
 
   for(n = 0; n <= N; n++) {
     for(find = -2; find <= n+2; find++) {
-      ptr = sarray_bsearch(arr, n, sizeof(arr[0]), array_search_int, &find);
+      ptr = gca_bsearch(arr, n, sizeof(arr[0]), gca_search_int, &find);
       TASSERT(ptr == (find < 0 || find >= n ? NULL : &arr[find]));
     }
   }
@@ -191,19 +191,19 @@ void test_quicksort()
   {
     // start with reverse sorted array
     for(i = 0; i < n; i++) arr[i] = n-1-i;
-    array_qsort(arr, n, sizeof(arr[0]), array_cmp2_size, NULL);
-    TASSERT(array_is_sorted(arr, n, sizeof(arr[0]), array_cmp2_size, NULL));
+    gca_qsort(arr, n, sizeof(arr[0]), gca_cmp2_size, NULL);
+    TASSERT(gca_is_sorted(arr, n, sizeof(arr[0]), gca_cmp2_size, NULL));
 
     // start with sorted array
     for(i = 0; i < n; i++) arr[i] = i;
-    array_qsort(arr, n, sizeof(arr[0]), array_cmp2_size, NULL);
-    TASSERT(array_is_sorted(arr, n, sizeof(arr[0]), array_cmp2_size, NULL));
+    gca_qsort(arr, n, sizeof(arr[0]), gca_cmp2_size, NULL);
+    TASSERT(gca_is_sorted(arr, n, sizeof(arr[0]), gca_cmp2_size, NULL));
 
     // shuffle the array first
     for(j = 0; j < 100; j++) {
-      array_shuffle(arr, n, sizeof(arr[0]));
-      array_qsort(arr, n, sizeof(arr[0]), array_cmp2_size, NULL);
-      TASSERT(array_is_sorted(arr, n, sizeof(arr[0]), array_cmp2_size, NULL));
+      gca_shuffle(arr, n, sizeof(arr[0]));
+      gca_qsort(arr, n, sizeof(arr[0]), gca_cmp2_size, NULL);
+      TASSERT(gca_is_sorted(arr, n, sizeof(arr[0]), gca_cmp2_size, NULL));
     }
   }
 
@@ -230,11 +230,11 @@ void test_quickpartition()
   for(i = 0; i < N; i++) arr[i] = i;
 
   for(n = 0; n <= N; n++) {
-    array_shuffle(arr, n, sizeof(arr[0]));
+    gca_shuffle(arr, n, sizeof(arr[0]));
     for(i = 0; i < n; i++) {
       p = arr[i];
-      carrays_swapm(&arr[0], &arr[i], sizeof(arr[0]));
-      array_qpart(arr, n, sizeof(arr[0]), array_cmp2_size, NULL);
+      gca_swapm(&arr[0], &arr[i], sizeof(arr[0]));
+      gca_qpart(arr, n, sizeof(arr[0]), gca_cmp2_size, NULL);
       TASSERT(arr[p] == p);
       TASSERT(check_qpart(arr, n, p));
     }
@@ -253,8 +253,8 @@ void test_quickselect()
   for(n = 0; n <= N; n++)
   {
     // Create shuffled array of positions
-    array_shuffle(pos, n, sizeof(pos[0]));
-    // check all positions are <n (this is a test of array_shuffle())
+    gca_shuffle(pos, n, sizeof(pos[0]));
+    // check all positions are <n (this is a test of gca_shuffle())
     for(i = 0; i < n && pos[i] < n; i++) {}
     TASSERT(i == n);
 
@@ -263,17 +263,17 @@ void test_quickselect()
 
     // Check we can select each index without changing the array
     for(i = 0; i < n; i++) {
-      array_qselect(arr, n, sizeof(arr[0]), i, array_cmp2_size, NULL);
-      TASSERT(array_is_sorted(arr, n, sizeof(arr[0]), array_cmp2_size, NULL));
+      gca_qselect(arr, n, sizeof(arr[0]), i, gca_cmp2_size, NULL);
+      TASSERT(gca_is_sorted(arr, n, sizeof(arr[0]), gca_cmp2_size, NULL));
     }
 
     // shuffle and check
     for(i = 0; i < n; i++) {
-      array_qselect(arr, n, sizeof(arr[0]), pos[i], array_cmp2_size, NULL);
+      gca_qselect(arr, n, sizeof(arr[0]), pos[i], gca_cmp2_size, NULL);
       TASSERT(check_qpart(arr, n, pos[i]));
     }
     // Should now be sorted after pivoting on each index
-    TASSERT(array_is_sorted(arr, n, sizeof(arr[0]), array_cmp2_size, NULL));
+    TASSERT(gca_is_sorted(arr, n, sizeof(arr[0]), gca_cmp2_size, NULL));
   }
 
   #undef N
@@ -291,22 +291,22 @@ void test_heapsort()
   {
     // start with sorted array
     for(j = 0; j < n; j++) arr[j] = j;
-    array_heap_make(arr, n, sizeof(arr[0]), array_cmp2_int, NULL);
-    array_heap_sort(arr, n, sizeof(arr[0]), array_cmp2_int, NULL);
-    TASSERT(array_is_sorted(arr, n, sizeof(arr[0]), array_cmp2_int, NULL));
+    gca_heap_make(arr, n, sizeof(arr[0]), gca_cmp2_int, NULL);
+    gca_heap_sort(arr, n, sizeof(arr[0]), gca_cmp2_int, NULL);
+    TASSERT(gca_is_sorted(arr, n, sizeof(arr[0]), gca_cmp2_int, NULL));
 
     // start with reverse sorted array
     for(j = 0; j < n; j++) arr[j] = n-1-j;
-    array_heap_make(arr, n, sizeof(arr[0]), array_cmp2_int, NULL);
-    array_heap_sort(arr, n, sizeof(arr[0]), array_cmp2_int, NULL);
-    TASSERT(array_is_sorted(arr, n, sizeof(arr[0]), array_cmp2_int, NULL));
+    gca_heap_make(arr, n, sizeof(arr[0]), gca_cmp2_int, NULL);
+    gca_heap_sort(arr, n, sizeof(arr[0]), gca_cmp2_int, NULL);
+    TASSERT(gca_is_sorted(arr, n, sizeof(arr[0]), gca_cmp2_int, NULL));
 
     // start with a shuffled array
     for(i = 0; i < 10; i++) {
-      array_shuffle(arr, n, sizeof(arr[0]));
-      array_heap_make(arr, n, sizeof(arr[0]), array_cmp2_int, NULL);
-      array_heap_sort(arr, n, sizeof(arr[0]), array_cmp2_int, NULL);
-      TASSERT(array_is_sorted(arr, n, sizeof(arr[0]), array_cmp2_int, NULL));
+      gca_shuffle(arr, n, sizeof(arr[0]));
+      gca_heap_make(arr, n, sizeof(arr[0]), gca_cmp2_int, NULL);
+      gca_heap_sort(arr, n, sizeof(arr[0]), gca_cmp2_int, NULL);
+      TASSERT(gca_is_sorted(arr, n, sizeof(arr[0]), gca_cmp2_int, NULL));
     }
   }
   #undef N
@@ -318,8 +318,8 @@ void test_heapsort()
 static inline void check_median(size_t *arr, size_t ans)
 {
   size_t i, tmp;
-  char *ptr = array_median5(&arr[0], &arr[1], &arr[2], &arr[3], &arr[4],
-                            array_cmp2_size, NULL);
+  char *ptr = gca_median5(&arr[0], &arr[1], &arr[2], &arr[3], &arr[4],
+                          gca_cmp2_size, NULL);
   memcpy(&tmp, ptr, sizeof(tmp));
   TASSERT(tmp == ans);
   if(tmp != ans) {
@@ -335,7 +335,7 @@ void test_median5()
   size_t i, m = 2, *itr = NULL;
 
   // 5*4*3*2*1 = 120 perumations
-  for(i = 0; carray_itr_next(&itr, 5); i++)
+  for(i = 0; gca_itr_next(&itr, 5); i++)
     check_median(itr, m);
 
   TASSERT(i == 5*4*3*2*1);
@@ -353,7 +353,7 @@ void test_median5()
 
 void check_permutation5(size_t **pp, size_t a, size_t b, size_t c, size_t d, size_t e)
 {
-  size_t *p = carray_itr_next(pp, 5);
+  size_t *p = gca_itr_next(pp, 5);
   TASSERT(p != NULL);
   TASSERT(p[0] == a && p[1] == b && p[2] == c && p[3] == d && p[4] == e);
 }
@@ -509,46 +509,46 @@ void test_next_permutation()
   check_permutation5(&p,4,3,2,0,1);
   check_permutation5(&p,4,3,2,1,0);
 
-  TASSERT(carray_itr_next(&p, 5) == NULL);
-  TASSERT(carray_itr_next(&p, 5) == NULL);
-  TASSERT(carray_itr_next(&p, 5) == NULL);
+  TASSERT(gca_itr_next(&p, 5) == NULL);
+  TASSERT(gca_itr_next(&p, 5) == NULL);
+  TASSERT(gca_itr_next(&p, 5) == NULL);
 
-  TASSERT(carray_itr_reset(p, 5) == p && p != NULL);
+  TASSERT(gca_itr_reset(p, 5) == p && p != NULL);
   check_permutation5(&p,0,1,2,3,4);
   check_permutation5(&p,0,1,2,4,3);
 
   free(p);
 
   p = NULL;
-  TASSERT(carray_itr_next(&p, 2) == p);
+  TASSERT(gca_itr_next(&p, 2) == p);
   TASSERT(p[0] == 0 && p[1] == 1);
-  TASSERT(carray_itr_next(&p, 2) == p);
+  TASSERT(gca_itr_next(&p, 2) == p);
   TASSERT(p[0] == 1 && p[1] == 0);
-  TASSERT(carray_itr_next(&p, 2) == NULL);
-  TASSERT(carray_itr_next(&p, 2) == NULL);
+  TASSERT(gca_itr_next(&p, 2) == NULL);
+  TASSERT(gca_itr_next(&p, 2) == NULL);
 
-  p = carray_itr_reset(p, 2);
-  TASSERT(carray_itr_next(&p, 2) == p);
+  p = gca_itr_reset(p, 2);
+  TASSERT(gca_itr_next(&p, 2) == p);
   TASSERT(p[0] == 0 && p[1] == 1);
-  TASSERT(carray_itr_next(&p, 2) == p);
+  TASSERT(gca_itr_next(&p, 2) == p);
   TASSERT(p[0] == 1 && p[1] == 0);
   free(p);
 
   // Test init various lengths
   for(n = 0; n < 5; n++)
   {
-    p = carray_itr_reset(NULL, n);
-    TASSERT(carray_itr_next(&p, n) == (n ? p : NULL));
+    p = gca_itr_reset(NULL, n);
+    TASSERT(gca_itr_next(&p, n) == (n ? p : NULL));
     for(i = 0; i < n; i++) TASSERT(p[i] == i);
     // reuse
-    p = carray_itr_reset(p, n);
-    TASSERT(carray_itr_next(&p, n) == (n ? p : NULL));
+    p = gca_itr_reset(p, n);
+    TASSERT(gca_itr_next(&p, n) == (n ? p : NULL));
     for(i = 0; i < n; i++) TASSERT(p[i] == i);
     free(p);
 
-    // initialise without carray_itr_reset()
+    // initialise without gca_itr_reset()
     p = NULL;
-    TASSERT(carray_itr_next(&p, n) == (n ? p : NULL));
+    TASSERT(gca_itr_next(&p, n) == (n ? p : NULL));
     for(i = 0; i < n; i++) TASSERT(p[i] == i);
     free(p);
   }
@@ -559,7 +559,7 @@ int main()
   status("Running tests...");
   test_round();
   test_GCD();
-  test_array_cycle();
+  test_cycle();
   test_reverse();
   test_bsearch();
   test_quicksort();

@@ -9,7 +9,7 @@
 
 // Get Greatest Common Divisor using binary GCD algorithm
 // http://en.wikipedia.org/wiki/Binary_GCD_algorithm
-uint32_t carrays_calc_GCD(uint32_t a, uint32_t b)
+uint32_t gca_calc_GCD(uint32_t a, uint32_t b)
 {
   uint32_t shift;
 
@@ -37,14 +37,14 @@ uint32_t carrays_calc_GCD(uint32_t a, uint32_t b)
 
 // cyclic-shift an array by `shift` elements
 // cycle left shifts towards zero
-void array_cycle_left(void *_ptr, size_t n, size_t es, size_t shift)
+void gca_cycle_left(void *_ptr, size_t n, size_t es, size_t shift)
 {
   char *ptr = (char*)_ptr;
   if(n <= 1 || !shift) return; // cannot mod by zero
   shift = shift % n; // shift cannot be greater than n
 
   // Using GCD
-  size_t i, j, k, gcd = carrays_calc_GCD(n, shift);
+  size_t i, j, k, gcd = gca_calc_GCD(n, shift);
   char tmp[es];
 
   // i is initial starting position
@@ -62,37 +62,37 @@ void array_cycle_left(void *_ptr, size_t n, size_t es, size_t shift)
 }
 
 // cycle right shifts away from zero
-void array_cycle_right(void *_ptr, size_t n, size_t es, size_t shift)
+void gca_cycle_right(void *_ptr, size_t n, size_t es, size_t shift)
 {
   if(!n || !shift) return; // cannot mod by zero
   shift = shift % n; // shift cannot be greater than n
   // cycle right by `s` is equivalent to cycle left by `n - s`
-  array_cycle_left(_ptr, n, es, n - shift);
+  gca_cycle_left(_ptr, n, es, n - shift);
 }
 
-void array_reverse(void *_ptr, size_t n, size_t es)
+void gca_reverse(void *_ptr, size_t n, size_t es)
 {
   if(n <= 1 || !es) return;
   char *a = (char*)_ptr, *b = a + es*(n-1);
-  for(; a < b; a += es, b -= es) carrays_swapm(a, b, es);
+  for(; a < b; a += es, b -= es) gca_swapm(a, b, es);
 }
 
 // Shuffle entire array
 // Fisher-Yates shuffle. Initiate srand() before calling.
-void array_shuffle(void *base, size_t n, size_t es)
+void gca_shuffle(void *base, size_t n, size_t es)
 {
-  array_sample(base, n, es, n);
+  gca_sample(base, n, es, n);
 }
 
 // Sample m elements by moving them to the front of the array
 // Fisher-Yates shuffle. Initiate srand() before calling.
-void array_sample(void *base, size_t n, size_t es, size_t m)
+void gca_sample(void *base, size_t n, size_t es, size_t m)
 {
   char *b = (char*)base;
   size_t i, j;
   for(i = 0; i < m; i++) {
     j = i + (n-i)*drand48(); // i + rand where: 0 <= rand < n-i
-    carrays_swapm(b+es*i, b+es*j, es);
+    gca_swapm(b+es*i, b+es*j, es);
   }
 }
 
@@ -106,14 +106,14 @@ void sarrays_merge(void *_dst, size_t ndst, size_t nsrc, size_t es,
   if(!nsrc || !ndst) {}
   else if(compar(src-es, src, arg) <= 0) {}
   else if(compar(dst, end-es, arg) >= 0) {
-    array_cycle_left(dst, ndst, es, ndst);
+    gca_cycle_left(dst, ndst, es, ndst);
   }
   else if(ndst+nsrc < 6) {
     // insertion sort merge of dst and src
-    sarrays_imerge(dst, ndst, nsrc, es, compar, arg);
+    gca_imerge(dst, ndst, nsrc, es, compar, arg);
   }
   else {
-    array_qsort(dst, ndst+nsrc, es, compar, arg);
+    gca_qsort(dst, ndst+nsrc, es, compar, arg);
   }
 }
 
@@ -121,9 +121,9 @@ void sarrays_merge(void *_dst, size_t ndst, size_t nsrc, size_t es,
 // compar is a function that compares a given value with the value we are
 // searching for. It returns <0 if _val is < target, >0 if _val is > target,
 // 0 otherwise.
-void* sarray_bsearch(void *_ptr, size_t n, size_t es,
-                     int (*compar)(const void *_val, void *_arg),
-                     void *arg)
+void* gca_bsearch(void *_ptr, size_t n, size_t es,
+                  int (*compar)(const void *_val, void *_arg),
+                  void *arg)
 {
   if(n == 0) return NULL;
 
@@ -150,9 +150,9 @@ void* sarray_bsearch(void *_ptr, size_t n, size_t es,
 // Quicksort Partition
 // Pivot is in first index
 // returns index of pivot after partitioning
-size_t array_qpart(void *base, size_t nel, size_t es,
-                   int (*compar)(const void *_a, const void *_b, void *_arg),
-                   void *arg)
+size_t gca_qpart(void *base, size_t nel, size_t es,
+                 int (*compar)(const void *_a, const void *_b, void *_arg),
+                 void *arg)
 {
   if(nel <= 1) return 0;
   char pivot[es], *b = (char*)base, *pl = b, *pr = b+es*(nel-1);
@@ -181,27 +181,27 @@ size_t array_qpart(void *base, size_t nel, size_t es,
 }
 
 // Note: quicksort is not stable, equivalent values may be swapped
-void array_qsort(void *base, size_t nel, size_t es,
-                 int (*compar)(const void *_a, const void *_b, void *_arg),
-                 void *arg)
+void gca_qsort(void *base, size_t nel, size_t es,
+               int (*compar)(const void *_a, const void *_b, void *_arg),
+               void *arg)
 {
   char *b = (char*)base;
 
   if(nel < 6) {
     /* Insertion sort for small inputs */
-    arrays_isortr(base, 0, nel, es, compar, arg);
+    gca_isortr(base, 0, nel, es, compar, arg);
   }
   else
   {
     /* Use median of first, middle and last items as pivot */
-    char *pivot = array_median3(b, b+es*(nel/2), b+es*(nel-1), compar, arg);
+    char *pivot = gca_median3(b, b+es*(nel/2), b+es*(nel-1), compar, arg);
 
     // swap pivot into first element and partition
-    carrays_swapm(b, pivot, es);
-    size_t pidx = array_qpart(b, nel, es, compar, arg);
+    gca_swapm(b, pivot, es);
+    size_t pidx = gca_qpart(b, nel, es, compar, arg);
 
-    array_qsort(b, pidx, es, compar, arg);
-    array_qsort(b+es*(pidx+1), nel-(pidx+1), es, compar, arg);
+    gca_qsort(b, pidx, es, compar, arg);
+    gca_qsort(b+es*(pidx+1), nel-(pidx+1), es, compar, arg);
   }
 }
 
@@ -210,9 +210,9 @@ void array_qsort(void *base, size_t nel, size_t es,
 //
 
 // Get k-th element from unsorted array, uising quickselect
-void array_qselect(void *base, size_t nel, size_t es, size_t kidx,
-                   int (*compar)(const void *_a, const void *_b, void *_arg),
-                   void *arg)
+void gca_qselect(void *base, size_t nel, size_t es, size_t kidx,
+                 int (*compar)(const void *_a, const void *_b, void *_arg),
+                 void *arg)
 {
   char *b = (char*)base;
   size_t pidx, l = 0, r = nel-1;
@@ -223,11 +223,11 @@ void array_qselect(void *base, size_t nel, size_t es, size_t kidx,
   while(1)
   {
     /* Use median of first, middle and last items as pivot */
-    char *pivot = array_median3(b+es*l, b+es*(l+(r-l+1)/2), b+es*r, compar, arg);
+    char *pivot = gca_median3(b+es*l, b+es*(l+(r-l+1)/2), b+es*r, compar, arg);
 
     // swap pivot into first element and partition
-    carrays_swapm(b+es*l, pivot, es);
-    pidx = l + array_qpart(b+es*l, r-l+1, es, compar, arg);
+    gca_swapm(b+es*l, pivot, es);
+    pidx = l + gca_qpart(b+es*l, r-l+1, es, compar, arg);
 
     if(pidx > kidx) r = pidx-1;
     else if(pidx < kidx) l = pidx+1;
@@ -236,9 +236,9 @@ void array_qselect(void *base, size_t nel, size_t es, size_t kidx,
 }
 
 // Get k-th element from unsorted array, using quickselect and median of medians
-// void array_qselect_mmed(void *base, size_t nel, size_t es, size_t kidx,
-//                         int (*compar)(const void *_a, const void *_b, void *_arg),
-//                         void *arg)
+// void gca_qselect_mmed(void *base, size_t nel, size_t es, size_t kidx,
+//                       int (*compar)(const void *_a, const void *_b, void *_arg),
+//                       void *arg)
 // {
 
 // }
@@ -248,7 +248,7 @@ void array_qselect(void *base, size_t nel, size_t es, size_t kidx,
 //
 
 // New element at index nel-1, to be pushed up the heap
-void array_heap_pushup(void *heap, size_t nel, size_t es,
+void gca_heap_pushup(void *heap, size_t nel, size_t es,
                        int (*compar)(const void *_a, const void *_b, void *_arg),
                        void *arg)
 {
@@ -256,7 +256,7 @@ void array_heap_pushup(void *heap, size_t nel, size_t es,
   char tmp[es], *b = (char*)heap;
   memcpy(tmp, b+es*(nel-1), es);
   for(chi = nel-1; chi > 0; chi = pi) {
-    pi = array_heap_parent(chi);
+    pi = gca_heap_parent(chi);
     if(compar(b+es*pi, tmp, arg) >= 0) break;
     memcpy(b+es*chi, b+es*pi, es);
   }
@@ -264,9 +264,9 @@ void array_heap_pushup(void *heap, size_t nel, size_t es,
 }
 
 // New element at index 0, to be pushed down the heap
-void array_heap_pushdwn(void *heap, size_t nel, size_t es,
-                        int (*compar)(const void *_a, const void *_b, void *_arg),
-                        void *arg)
+void gca_heap_pushdwn(void *heap, size_t nel, size_t es,
+                      int (*compar)(const void *_a, const void *_b, void *_arg),
+                      void *arg)
 {
   char tmp[es], *b = (char*)heap, *last = b+es*(nel-1), *p, *ch;
   memcpy(tmp, last, es);
@@ -278,20 +278,20 @@ void array_heap_pushdwn(void *heap, size_t nel, size_t es,
   memcpy(p, tmp, es);
 }
 
-void array_heap_make(void *heap, size_t nel, size_t es,
-                     int (*compar)(const void *_a, const void *_b, void *_arg),
-                     void *arg)
+void gca_heap_make(void *heap, size_t nel, size_t es,
+                   int (*compar)(const void *_a, const void *_b, void *_arg),
+                   void *arg)
 {
   size_t n;
   // add elements one-at-a-time to the end
   for(n = 2; n <= nel; n++)
-    array_heap_pushup(heap, n, es, compar, arg);
+    gca_heap_pushup(heap, n, es, compar, arg);
 }
 
 // ar[idx]: child1 => arr[2*idx+1], child2 => arr[2*idx+2]
-void array_heap_sort(void *heap, size_t nel, size_t es,
-                     int (*compar)(const void *_a, const void *_b, void *_arg),
-                     void *arg)
+void gca_heap_sort(void *heap, size_t nel, size_t es,
+                   int (*compar)(const void *_a, const void *_b, void *_arg),
+                   void *arg)
 {
   if(nel <= 1) return;
   char *b = (char*)heap, *end;
@@ -299,10 +299,10 @@ void array_heap_sort(void *heap, size_t nel, size_t es,
   // take elements off the top one at a time, by swapping first and end
   for(n = nel-1, end = b+es*n; n > 1; n--, end -= es)
   {
-    carrays_swapm(b, end, es);
-    array_heap_pushdwn(heap, n, es, compar, arg);
+    gca_swapm(b, end, es);
+    gca_heap_pushdwn(heap, n, es, compar, arg);
   }
-  carrays_swapm(b, b+es, es);
+  gca_swapm(b, b+es, es);
 }
 
 //
@@ -310,9 +310,9 @@ void array_heap_sort(void *heap, size_t nel, size_t es,
 //
 
 // Get pointer to median of three elements
-void* array_median3(void *p0, void *p1, void *p2,
-                    int (*compar)(const void *_a, const void *_b, void *_arg),
-                    void *arg)
+void* gca_median3(void *p0, void *p1, void *p2,
+                  int (*compar)(const void *_a, const void *_b, void *_arg),
+                  void *arg)
 {
   if(compar(p0, p1, arg) > 0) SWAP(p0, p1);
   if(compar(p1, p2, arg) > 0) {
@@ -323,9 +323,9 @@ void* array_median3(void *p0, void *p1, void *p2,
 }
 
 // Get pointer to median of five elements
-void* array_median5(void *p0, void *p1, void *p2, void *p3, void *p4,
-                    int (*compar)(const void *_a, const void *_b, void *_arg),
-                    void *arg)
+void* gca_median5(void *p0, void *p1, void *p2, void *p3, void *p4,
+                  int (*compar)(const void *_a, const void *_b, void *_arg),
+                  void *arg)
 {
   // make p0<p1
   if(compar(p0, p1, arg) > 0) SWAP(p0, p1);
@@ -355,14 +355,14 @@ void* array_median5(void *p0, void *p1, void *p2, void *p3, void *p4,
 // Permutation
 //
 
-size_t* carray_itr_reset(size_t *p, size_t n)
+size_t* gca_itr_reset(size_t *p, size_t n)
 {
   if(!p) p = malloc(n * sizeof(size_t));
   if(p && n) p[0] = SIZE_MAX;
   return p;
 }
 
-size_t* carray_itr_next(size_t **pp, size_t n)
+size_t* gca_itr_next(size_t **pp, size_t n)
 {
   size_t i, j, *p = *pp;
 
@@ -383,7 +383,7 @@ size_t* carray_itr_next(size_t **pp, size_t n)
 
   // printf(" i:%zu j:%zu\n", i, j);
   SWAP(p[i-1], p[j]);
-  array_reverse(p+i, n-i, sizeof(p[0]));
+  gca_reverse(p+i, n-i, sizeof(p[0]));
 
   return p;
 }
