@@ -312,7 +312,8 @@ void test_heapsort()
   #undef N
 }
 
-#define perm(x,a,b,c,d,e) do { x[0]=(a);x[1]=(b);x[2]=(c);x[3]=(d);x[4]=(e); }while(0)
+
+#define arrset5(x,a,b,c,d,e) do { x[0]=(a);x[1]=(b);x[2]=(c);x[3]=(d);x[4]=(e); }while(0)
 
 static inline void check_median(size_t *arr, size_t ans)
 {
@@ -330,152 +331,227 @@ static inline void check_median(size_t *arr, size_t ans)
 
 void test_median5()
 {
-  size_t arr[5], m = 2;
+  size_t arr[5];
+  size_t i, m = 2, *itr = NULL;
 
-  // 5*4*3*2 = 120 perumations
-  perm(arr,0,1,2,3,4); check_median(arr,m);
-  perm(arr,0,1,2,4,3); check_median(arr,m);
-  perm(arr,0,1,3,2,4); check_median(arr,m);
-  perm(arr,0,1,3,4,2); check_median(arr,m);
-  perm(arr,0,1,4,2,3); check_median(arr,m);
-  perm(arr,0,1,4,3,2); check_median(arr,m);
+  // 5*4*3*2*1 = 120 perumations
+  for(i = 0; carray_itr_next(&itr, 5); i++)
+    check_median(itr, m);
 
-  perm(arr,0,2,1,3,4); check_median(arr,m);
-  perm(arr,0,2,1,4,3); check_median(arr,m);
-  perm(arr,0,2,3,1,4); check_median(arr,m);
-  perm(arr,0,2,3,4,1); check_median(arr,m);
-  perm(arr,0,2,4,1,3); check_median(arr,m);
-  perm(arr,0,2,4,3,1); check_median(arr,m);
+  TASSERT(i == 5*4*3*2*1);
+  free(itr);
 
-  perm(arr,0,3,1,2,4); check_median(arr,m);
-  perm(arr,0,3,1,4,2); check_median(arr,m);
-  perm(arr,0,3,2,1,4); check_median(arr,m);
-  perm(arr,0,3,2,4,1); check_median(arr,m);
-  perm(arr,0,3,4,1,2); check_median(arr,m);
-  perm(arr,0,3,4,2,1); check_median(arr,m);
+  for(i = 0; i < 10; i++) {
+    arrset5(arr, i, i, i, i, i);
+    check_median(arr, i);
+  }
 
-  perm(arr,0,4,1,2,3); check_median(arr,m);
-  perm(arr,0,4,1,3,2); check_median(arr,m);
-  perm(arr,0,4,2,1,3); check_median(arr,m);
-  perm(arr,0,4,2,3,1); check_median(arr,m);
-  perm(arr,0,4,3,1,2); check_median(arr,m);
-  perm(arr,0,4,3,2,1); check_median(arr,m);
+  arrset5(arr, 10, 0, 10,  0, 10); check_median(arr, 10);
+  arrset5(arr, 1,  9,  9, 10, 10); check_median(arr, 9);
+  arrset5(arr, 10, 10, 9,  8,  7); check_median(arr, 9);
+}
 
-  //
-  perm(arr,1,0,2,3,4); check_median(arr,m);
-  perm(arr,1,0,2,4,3); check_median(arr,m);
-  perm(arr,1,0,3,2,4); check_median(arr,m);
-  perm(arr,1,0,3,4,2); check_median(arr,m);
-  perm(arr,1,0,4,2,3); check_median(arr,m);
-  perm(arr,1,0,4,3,2); check_median(arr,m);
+void check_permutation5(size_t **pp, size_t a, size_t b, size_t c, size_t d, size_t e)
+{
+  size_t *p = carray_itr_next(pp, 5);
+  TASSERT(p != NULL);
+  TASSERT(p[0] == a && p[1] == b && p[2] == c && p[3] == d && p[4] == e);
+}
 
-  perm(arr,1,2,0,3,4); check_median(arr,m);
-  perm(arr,1,2,0,4,3); check_median(arr,m);
-  perm(arr,1,2,3,0,4); check_median(arr,m);
-  perm(arr,1,2,3,4,0); check_median(arr,m);
-  perm(arr,1,2,4,0,3); check_median(arr,m);
-  perm(arr,1,2,4,3,0); check_median(arr,m);
+void test_next_permutation()
+{
+  status("Testing next permutation...");
 
-  perm(arr,1,3,0,2,4); check_median(arr,m);
-  perm(arr,1,3,0,4,2); check_median(arr,m);
-  perm(arr,1,3,2,0,4); check_median(arr,m);
-  perm(arr,1,3,2,4,0); check_median(arr,m);
-  perm(arr,1,3,4,0,2); check_median(arr,m);
-  perm(arr,1,3,4,2,0); check_median(arr,m);
+  size_t i, n;
+  size_t *p = NULL;
 
-  perm(arr,1,4,0,2,3); check_median(arr,m);
-  perm(arr,1,4,0,3,2); check_median(arr,m);
-  perm(arr,1,4,2,0,3); check_median(arr,m);
-  perm(arr,1,4,2,3,0); check_median(arr,m);
-  perm(arr,1,4,3,0,2); check_median(arr,m);
-  perm(arr,1,4,3,2,0); check_median(arr,m);
+  check_permutation5(&p,0,1,2,3,4);
+  check_permutation5(&p,0,1,2,4,3);
+  check_permutation5(&p,0,1,3,2,4);
+  check_permutation5(&p,0,1,3,4,2);
+  check_permutation5(&p,0,1,4,2,3);
+  check_permutation5(&p,0,1,4,3,2);
 
-  //
-  perm(arr,2,0,1,3,4); check_median(arr,m);
-  perm(arr,2,0,1,4,3); check_median(arr,m);
-  perm(arr,2,0,3,1,4); check_median(arr,m);
-  perm(arr,2,0,3,4,1); check_median(arr,m);
-  perm(arr,2,0,4,1,3); check_median(arr,m);
-  perm(arr,2,0,4,3,1); check_median(arr,m);
+  check_permutation5(&p,0,2,1,3,4);
+  check_permutation5(&p,0,2,1,4,3);
+  check_permutation5(&p,0,2,3,1,4);
+  check_permutation5(&p,0,2,3,4,1);
+  check_permutation5(&p,0,2,4,1,3);
+  check_permutation5(&p,0,2,4,3,1);
 
-  perm(arr,2,1,0,3,4); check_median(arr,m);
-  perm(arr,2,1,0,4,3); check_median(arr,m);
-  perm(arr,2,1,3,0,4); check_median(arr,m);
-  perm(arr,2,1,3,4,0); check_median(arr,m);
-  perm(arr,2,1,4,0,3); check_median(arr,m);
-  perm(arr,2,1,4,3,0); check_median(arr,m);
+  check_permutation5(&p,0,3,1,2,4);
+  check_permutation5(&p,0,3,1,4,2);
+  check_permutation5(&p,0,3,2,1,4);
+  check_permutation5(&p,0,3,2,4,1);
+  check_permutation5(&p,0,3,4,1,2);
+  check_permutation5(&p,0,3,4,2,1);
 
-  perm(arr,2,3,0,1,4); check_median(arr,m);
-  perm(arr,2,3,0,4,1); check_median(arr,m);
-  perm(arr,2,3,1,0,4); check_median(arr,m);
-  perm(arr,2,3,1,4,0); check_median(arr,m);
-  perm(arr,2,3,4,0,1); check_median(arr,m);
-  perm(arr,2,3,4,1,0); check_median(arr,m);
-
-  perm(arr,2,4,0,1,3); check_median(arr,m);
-  perm(arr,2,4,0,3,1); check_median(arr,m);
-  perm(arr,2,4,1,0,3); check_median(arr,m);
-  perm(arr,2,4,1,3,0); check_median(arr,m);
-  perm(arr,2,4,3,0,1); check_median(arr,m);
-  perm(arr,2,4,3,1,0); check_median(arr,m);
+  check_permutation5(&p,0,4,1,2,3);
+  check_permutation5(&p,0,4,1,3,2);
+  check_permutation5(&p,0,4,2,1,3);
+  check_permutation5(&p,0,4,2,3,1);
+  check_permutation5(&p,0,4,3,1,2);
+  check_permutation5(&p,0,4,3,2,1);
 
   //
-  perm(arr,3,0,1,2,4); check_median(arr,m);
-  perm(arr,3,0,1,4,2); check_median(arr,m);
-  perm(arr,3,0,2,1,4); check_median(arr,m);
-  perm(arr,3,0,2,4,1); check_median(arr,m);
-  perm(arr,3,0,4,1,2); check_median(arr,m);
-  perm(arr,3,0,4,2,1); check_median(arr,m);
+  check_permutation5(&p,1,0,2,3,4);
+  check_permutation5(&p,1,0,2,4,3);
+  check_permutation5(&p,1,0,3,2,4);
+  check_permutation5(&p,1,0,3,4,2);
+  check_permutation5(&p,1,0,4,2,3);
+  check_permutation5(&p,1,0,4,3,2);
 
-  perm(arr,3,1,0,2,4); check_median(arr,m);
-  perm(arr,3,1,0,4,2); check_median(arr,m);
-  perm(arr,3,1,2,0,4); check_median(arr,m);
-  perm(arr,3,1,2,4,0); check_median(arr,m);
-  perm(arr,3,1,4,0,2); check_median(arr,m);
-  perm(arr,3,1,4,2,0); check_median(arr,m);
+  check_permutation5(&p,1,2,0,3,4);
+  check_permutation5(&p,1,2,0,4,3);
+  check_permutation5(&p,1,2,3,0,4);
+  check_permutation5(&p,1,2,3,4,0);
+  check_permutation5(&p,1,2,4,0,3);
+  check_permutation5(&p,1,2,4,3,0);
 
-  perm(arr,3,2,0,1,4); check_median(arr,m);
-  perm(arr,3,2,0,4,1); check_median(arr,m);
-  perm(arr,3,2,1,0,4); check_median(arr,m);
-  perm(arr,3,2,1,4,0); check_median(arr,m);
-  perm(arr,3,2,4,0,1); check_median(arr,m);
-  perm(arr,3,2,4,1,0); check_median(arr,m);
+  check_permutation5(&p,1,3,0,2,4);
+  check_permutation5(&p,1,3,0,4,2);
+  check_permutation5(&p,1,3,2,0,4);
+  check_permutation5(&p,1,3,2,4,0);
+  check_permutation5(&p,1,3,4,0,2);
+  check_permutation5(&p,1,3,4,2,0);
 
-  perm(arr,3,4,0,1,2); check_median(arr,m);
-  perm(arr,3,4,0,2,1); check_median(arr,m);
-  perm(arr,3,4,1,0,2); check_median(arr,m);
-  perm(arr,3,4,1,2,0); check_median(arr,m);
-  perm(arr,3,4,2,0,1); check_median(arr,m);
-  perm(arr,3,4,2,1,0); check_median(arr,m);
+  check_permutation5(&p,1,4,0,2,3);
+  check_permutation5(&p,1,4,0,3,2);
+  check_permutation5(&p,1,4,2,0,3);
+  check_permutation5(&p,1,4,2,3,0);
+  check_permutation5(&p,1,4,3,0,2);
+  check_permutation5(&p,1,4,3,2,0);
 
   //
-  perm(arr,4,0,1,2,3); check_median(arr,m);
-  perm(arr,4,0,1,3,2); check_median(arr,m);
-  perm(arr,4,0,2,1,3); check_median(arr,m);
-  perm(arr,4,0,2,3,1); check_median(arr,m);
-  perm(arr,4,0,3,1,2); check_median(arr,m);
-  perm(arr,4,0,3,2,1); check_median(arr,m);
+  check_permutation5(&p,2,0,1,3,4);
+  check_permutation5(&p,2,0,1,4,3);
+  check_permutation5(&p,2,0,3,1,4);
+  check_permutation5(&p,2,0,3,4,1);
+  check_permutation5(&p,2,0,4,1,3);
+  check_permutation5(&p,2,0,4,3,1);
 
-  perm(arr,4,1,0,2,3); check_median(arr,m);
-  perm(arr,4,1,0,3,2); check_median(arr,m);
-  perm(arr,4,1,2,0,3); check_median(arr,m);
-  perm(arr,4,1,2,3,0); check_median(arr,m);
-  perm(arr,4,1,3,0,2); check_median(arr,m);
-  perm(arr,4,1,3,2,0); check_median(arr,m);
+  check_permutation5(&p,2,1,0,3,4);
+  check_permutation5(&p,2,1,0,4,3);
+  check_permutation5(&p,2,1,3,0,4);
+  check_permutation5(&p,2,1,3,4,0);
+  check_permutation5(&p,2,1,4,0,3);
+  check_permutation5(&p,2,1,4,3,0);
 
-  perm(arr,4,2,0,1,3); check_median(arr,m);
-  perm(arr,4,2,0,3,1); check_median(arr,m);
-  perm(arr,4,2,1,0,3); check_median(arr,m);
-  perm(arr,4,2,1,3,0); check_median(arr,m);
-  perm(arr,4,2,3,0,1); check_median(arr,m);
-  perm(arr,4,2,3,1,0); check_median(arr,m);
+  check_permutation5(&p,2,3,0,1,4);
+  check_permutation5(&p,2,3,0,4,1);
+  check_permutation5(&p,2,3,1,0,4);
+  check_permutation5(&p,2,3,1,4,0);
+  check_permutation5(&p,2,3,4,0,1);
+  check_permutation5(&p,2,3,4,1,0);
 
-  perm(arr,4,3,0,1,2); check_median(arr,m);
-  perm(arr,4,3,0,2,1); check_median(arr,m);
-  perm(arr,4,3,1,0,2); check_median(arr,m);
-  perm(arr,4,3,1,2,0); check_median(arr,m);
-  perm(arr,4,3,2,0,1); check_median(arr,m);
-  perm(arr,4,3,2,1,0); check_median(arr,m);
+  check_permutation5(&p,2,4,0,1,3);
+  check_permutation5(&p,2,4,0,3,1);
+  check_permutation5(&p,2,4,1,0,3);
+  check_permutation5(&p,2,4,1,3,0);
+  check_permutation5(&p,2,4,3,0,1);
+  check_permutation5(&p,2,4,3,1,0);
+
+  //
+  check_permutation5(&p,3,0,1,2,4);
+  check_permutation5(&p,3,0,1,4,2);
+  check_permutation5(&p,3,0,2,1,4);
+  check_permutation5(&p,3,0,2,4,1);
+  check_permutation5(&p,3,0,4,1,2);
+  check_permutation5(&p,3,0,4,2,1);
+
+  check_permutation5(&p,3,1,0,2,4);
+  check_permutation5(&p,3,1,0,4,2);
+  check_permutation5(&p,3,1,2,0,4);
+  check_permutation5(&p,3,1,2,4,0);
+  check_permutation5(&p,3,1,4,0,2);
+  check_permutation5(&p,3,1,4,2,0);
+
+  check_permutation5(&p,3,2,0,1,4);
+  check_permutation5(&p,3,2,0,4,1);
+  check_permutation5(&p,3,2,1,0,4);
+  check_permutation5(&p,3,2,1,4,0);
+  check_permutation5(&p,3,2,4,0,1);
+  check_permutation5(&p,3,2,4,1,0);
+
+  check_permutation5(&p,3,4,0,1,2);
+  check_permutation5(&p,3,4,0,2,1);
+  check_permutation5(&p,3,4,1,0,2);
+  check_permutation5(&p,3,4,1,2,0);
+  check_permutation5(&p,3,4,2,0,1);
+  check_permutation5(&p,3,4,2,1,0);
+
+  //
+  check_permutation5(&p,4,0,1,2,3);
+  check_permutation5(&p,4,0,1,3,2);
+  check_permutation5(&p,4,0,2,1,3);
+  check_permutation5(&p,4,0,2,3,1);
+  check_permutation5(&p,4,0,3,1,2);
+  check_permutation5(&p,4,0,3,2,1);
+
+  check_permutation5(&p,4,1,0,2,3);
+  check_permutation5(&p,4,1,0,3,2);
+  check_permutation5(&p,4,1,2,0,3);
+  check_permutation5(&p,4,1,2,3,0);
+  check_permutation5(&p,4,1,3,0,2);
+  check_permutation5(&p,4,1,3,2,0);
+
+  check_permutation5(&p,4,2,0,1,3);
+  check_permutation5(&p,4,2,0,3,1);
+  check_permutation5(&p,4,2,1,0,3);
+  check_permutation5(&p,4,2,1,3,0);
+  check_permutation5(&p,4,2,3,0,1);
+  check_permutation5(&p,4,2,3,1,0);
+
+  check_permutation5(&p,4,3,0,1,2);
+  check_permutation5(&p,4,3,0,2,1);
+  check_permutation5(&p,4,3,1,0,2);
+  check_permutation5(&p,4,3,1,2,0);
+  check_permutation5(&p,4,3,2,0,1);
+  check_permutation5(&p,4,3,2,1,0);
+
+  TASSERT(carray_itr_next(&p, 5) == NULL);
+  TASSERT(carray_itr_next(&p, 5) == NULL);
+  TASSERT(carray_itr_next(&p, 5) == NULL);
+
+  TASSERT(carray_itr_reset(p, 5) == p && p != NULL);
+  check_permutation5(&p,0,1,2,3,4);
+  check_permutation5(&p,0,1,2,4,3);
+
+  free(p);
+
+  p = NULL;
+  TASSERT(carray_itr_next(&p, 2) == p);
+  TASSERT(p[0] == 0 && p[1] == 1);
+  TASSERT(carray_itr_next(&p, 2) == p);
+  TASSERT(p[0] == 1 && p[1] == 0);
+  TASSERT(carray_itr_next(&p, 2) == NULL);
+  TASSERT(carray_itr_next(&p, 2) == NULL);
+
+  p = carray_itr_reset(p, 2);
+  TASSERT(carray_itr_next(&p, 2) == p);
+  TASSERT(p[0] == 0 && p[1] == 1);
+  TASSERT(carray_itr_next(&p, 2) == p);
+  TASSERT(p[0] == 1 && p[1] == 0);
+  free(p);
+
+  // Test init various lengths
+  for(n = 0; n < 5; n++)
+  {
+    p = carray_itr_reset(NULL, n);
+    TASSERT(carray_itr_next(&p, n) == (n ? p : NULL));
+    for(i = 0; i < n; i++) TASSERT(p[i] == i);
+    // reuse
+    p = carray_itr_reset(p, n);
+    TASSERT(carray_itr_next(&p, n) == (n ? p : NULL));
+    for(i = 0; i < n; i++) TASSERT(p[i] == i);
+    free(p);
+
+    // initialise without carray_itr_reset()
+    p = NULL;
+    TASSERT(carray_itr_next(&p, n) == (n ? p : NULL));
+    for(i = 0; i < n; i++) TASSERT(p[i] == i);
+    free(p);
+  }
 }
 
 int main()
@@ -491,6 +567,7 @@ int main()
   test_quickselect();
   test_heapsort();
   test_median5();
+  test_next_permutation();
   status("Passed: %zu / %zu (%s)", num_tests_run-num_tests_failed, num_tests_run,
          !num_tests_failed ? "all" : (num_tests_failed<num_tests_run ? "some" : "none"));
   status("Done.");

@@ -2,6 +2,11 @@
 #include <assert.h>
 #include "carrays.h"
 
+//
+// TODO:
+// 1. quickselect using median of medians
+//
+
 // Get Greatest Common Divisor using binary GCD algorithm
 // http://en.wikipedia.org/wiki/Binary_GCD_algorithm
 uint32_t carrays_calc_GCD(uint32_t a, uint32_t b)
@@ -72,19 +77,25 @@ void array_reverse(void *_ptr, size_t n, size_t es)
   for(; a < b; a += es, b -= es) carrays_swapm(a, b, es);
 }
 
-// Fisher-Yates shuffle. Initiate srand48() before calling.
-void array_shuffle(void *_ptr, size_t n, size_t es)
+// Shuffle entire array
+// Fisher-Yates shuffle. Initiate srand() before calling.
+void array_shuffle(void *base, size_t n, size_t es)
 {
-  if(n <= 1 || !es) return;
-  char *ptr = (char*)_ptr;
+  array_sample(base, n, es, n);
+}
+
+// Sample m elements by moving them to the front of the array
+// Fisher-Yates shuffle. Initiate srand() before calling.
+void array_sample(void *base, size_t n, size_t es, size_t m)
+{
+  char *b = (char*)base;
   size_t i, j;
-  for(i = n-1; i > 0; i--) {
-    j = drand48() * (i+1); // rand between 0,i inclusive
-    carrays_swapm(ptr+es*i, ptr+es*j, es);
+  for(i = 0; i < m; i++) {
+    j = i + (n-i)*drand48(); // i + rand where: 0 <= rand < n-i
+    carrays_swapm(b+es*i, b+es*j, es);
   }
 }
 
-#define CARRAYS_ISORT_CUTOFF 6
 
 // Merge two sorted arrays to create a merged sorted array
 void sarrays_merge(void *_dst, size_t ndst, size_t nsrc, size_t es,
@@ -97,7 +108,7 @@ void sarrays_merge(void *_dst, size_t ndst, size_t nsrc, size_t es,
   else if(compar(dst, end-es, arg) >= 0) {
     array_cycle_left(dst, ndst, es, ndst);
   }
-  else if(ndst+nsrc < CARRAYS_ISORT_CUTOFF) {
+  else if(ndst+nsrc < 6) {
     // insertion sort merge of dst and src
     sarrays_imerge(dst, ndst, nsrc, es, compar, arg);
   }
@@ -176,14 +187,12 @@ void array_qsort(void *base, size_t nel, size_t es,
 {
   char *b = (char*)base;
 
-  if(nel < CARRAYS_ISORT_CUTOFF) {
+  if(nel < 6) {
     /* Insertion sort for small inputs */
     arrays_isortr(base, 0, nel, es, compar, arg);
   }
   else
   {
-    /* nel >= 6; Quicksort */
-
     /* Use median of first, middle and last items as pivot */
     char *pivot = array_median3(b, b+es*(nel/2), b+es*(nel-1), compar, arg);
 
@@ -231,31 +240,52 @@ void array_qselect(void *base, size_t nel, size_t es, size_t kidx,
 //                         int (*compar)(const void *_a, const void *_b, void *_arg),
 //                         void *arg)
 // {
+
 // }
 
 //
 // Heapsort
 //
 
-void array_heap_make(void *base, size_t nel, size_t es,
+// New element at index nel-1, to be pushed up the heap
+void array_heap_pushup(void *heap, size_t nel, size_t es,
+                       int (*compar)(const void *_a, const void *_b, void *_arg),
+                       void *arg)
+{
+  size_t chi, pi; // child idx, parent idx
+  char tmp[es], *b = (char*)heap;
+  memcpy(tmp, b+es*(nel-1), es);
+  for(chi = nel-1; chi > 0; chi = pi) {
+    pi = array_heap_parent(chi);
+    if(compar(b+es*pi, tmp, arg) >= 0) break;
+    memcpy(b+es*chi, b+es*pi, es);
+  }
+  memcpy(b+es*chi, tmp, es);
+}
+
+// New element at index 0, to be pushed down the heap
+void array_heap_pushdwn(void *heap, size_t nel, size_t es,
+                        int (*compar)(const void *_a, const void *_b, void *_arg),
+                        void *arg)
+{
+  char tmp[es], *b = (char*)heap, *last = b+es*(nel-1), *p, *ch;
+  memcpy(tmp, last, es);
+  for(p = b, ch = b+es; ch < last; p = ch, ch = b + 2*(ch-b) + es) {
+    ch = (ch+es < last && compar(ch,ch+es,arg) < 0 ? ch+es : ch); // biggest child
+    if(compar(tmp, ch, arg) >= 0) break;
+    memcpy(p, ch, es);
+  }
+  memcpy(p, tmp, es);
+}
+
+void array_heap_make(void *heap, size_t nel, size_t es,
                      int (*compar)(const void *_a, const void *_b, void *_arg),
                      void *arg)
 {
-  char *b = (char*)base;
-  size_t chi, pi, n;
-  char tmp[es];
+  size_t n;
   // add elements one-at-a-time to the end
-  for(n = 1; n < nel; n++)
-  {
-    memcpy(tmp, b+es*n, es);
-    // push up the tree
-    for(chi = n; chi > 0; chi = pi) {
-      pi = array_heap_parent(chi);
-      if(compar(b+es*pi, tmp, arg) >= 0) break;
-      memcpy(b+es*chi, b+es*pi, es);
-    }
-    memcpy(b+es*chi, tmp, es);
-  }
+  for(n = 2; n <= nel; n++)
+    array_heap_pushup(heap, n, es, compar, arg);
 }
 
 // ar[idx]: child1 => arr[2*idx+1], child2 => arr[2*idx+2]
@@ -264,21 +294,15 @@ void array_heap_sort(void *heap, size_t nel, size_t es,
                      void *arg)
 {
   if(nel <= 1) return;
-  char *b = (char*)heap, *last, *p, *ch;
-  char tmp[es];
-  // take elements off the top one at a time, by swapping first and last
-  for(last = b+es*(nel-1); last > b; last -= es)
+  char *b = (char*)heap, *end;
+  size_t n;
+  // take elements off the top one at a time, by swapping first and end
+  for(n = nel-1, end = b+es*n; n > 1; n--, end -= es)
   {
-    memcpy(tmp, last, es);
-    memcpy(last, b, es);
-    // push down the tree
-    for(p = b, ch = b+es; ch < last; p = ch, ch = b + 2*(ch-b) + es) {
-      ch = (ch+es < last && compar(ch,ch+es,arg) < 0 ? ch+es : ch); // biggest child
-      if(compar(tmp, ch, arg) >= 0) break;
-      memcpy(p, ch, es);
-    }
-    memcpy(p, tmp, es);
+    carrays_swapm(b, end, es);
+    array_heap_pushdwn(heap, n, es, compar, arg);
   }
+  carrays_swapm(b, b+es, es);
 }
 
 //
@@ -324,4 +348,42 @@ void* array_median5(void *p0, void *p1, void *p2, void *p3, void *p4,
   } else {
     return (compar(p3, p0, arg) < 0 ? p3 : p0);
   }
+}
+
+
+//
+// Permutation
+//
+
+size_t* carray_itr_reset(size_t *p, size_t n)
+{
+  if(!p) p = malloc(n * sizeof(size_t));
+  if(p && n) p[0] = SIZE_MAX;
+  return p;
+}
+
+size_t* carray_itr_next(size_t **pp, size_t n)
+{
+  size_t i, j, *p = *pp;
+
+  if(!n) return NULL;
+  if(!*pp) {
+    p = *pp = malloc(n * sizeof(size_t));
+    for(i = 0; i < n; i++) p[i] = i;
+    return p;
+  } else if(p[0] == SIZE_MAX) {
+    for(i = 0; i < n; i++) p[i] = i;
+    return p;
+  }
+
+  i = n-1;
+  while(i > 0 && p[i-1] > p[i]) i--;
+  if(!i) return NULL; // end; hit max: 4321
+  for(j = i; j+1 < n && p[i-1] < p[j+1]; j++) {}
+
+  // printf(" i:%zu j:%zu\n", i, j);
+  SWAP(p[i-1], p[j]);
+  array_reverse(p+i, n-i, sizeof(p[0]));
+
+  return p;
 }

@@ -99,8 +99,13 @@ void array_cycle_right(void *_ptr, size_t n, size_t es, size_t shift);
 // Reverse order of elements in an array
 void array_reverse(void *_ptr, size_t n, size_t es);
 
+// Shuffle entire array
 // Fisher-Yates shuffle. Initiate srand() before calling.
 void array_shuffle(void *_ptr, size_t n, size_t es);
+
+// Sample m elements by moving them to the front of the array
+// Fisher-Yates shuffle. Initiate srand() before calling.
+void array_sample(void *base, size_t n, size_t es, size_t m);
 
 // Merge two sorted arrays to create a merged sorted array
 void sarrays_merge(void *_dst, size_t ndst, size_t nsrc, size_t es,
@@ -147,6 +152,16 @@ void array_qselect(void *base, size_t nel, size_t es, size_t kidx,
 #define array_heap_child1(idx) (2*(idx)+1)
 #define array_heap_child2(idx) (2*(idx)+2)
 
+// New element at index nel-1, to be pushed up the heap
+void array_heap_pushup(void *heap, size_t nel, size_t es,
+                       int (*compar)(const void *_a, const void *_b, void *_arg),
+                       void *arg);
+
+// New element at index 0, to be pushed down the heap
+void array_heap_pushdwn(void *heap, size_t nel, size_t es,
+                        int (*compar)(const void *_a, const void *_b, void *_arg),
+                        void *arg);
+
 void array_heap_make(void *base, size_t nel, size_t es,
                      int (*compar)(const void *_a, const void *_b, void *_arg),
                      void *arg);
@@ -178,7 +193,30 @@ void* array_median5(void *p0, void *p1, void *p2, void *p3, void *p4,
 //
 // Permutations
 //
-// size_t array_permutation();
+
+/*
+ * Permutation example:
+ *
+
+  size_t n = 5;
+  int *d = ...;
+  size_t *p = NULL;
+
+  while(carray_itr_next(&p, n))
+    printf("%i %i %i %i %i", d[p[0]], d[p[1]], d[p[2]], d[p[3]], d[p[4]]);
+
+  // Reset and loop over all permutations again
+  p = carray_itr_reset(p, n);
+  while(carray_itr_next(&p, n))
+    printf("%i %i %i %i %i", d[p[0]], d[p[1]], d[p[2]], d[p[3]], d[p[4]]);
+
+  // release iterator memory
+  free(p);
+
+*/
+
+size_t* carray_itr_reset(size_t *p, size_t n);
+size_t* carray_itr_next(size_t **pp, size_t n);
 
 //
 // Insertion sort
