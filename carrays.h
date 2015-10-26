@@ -105,20 +105,43 @@ void gca_shuffle(void *_ptr, size_t n, size_t es);
 // Fisher-Yates shuffle. Initiate srand() before calling.
 void gca_sample(void *base, size_t n, size_t es, size_t m);
 
-// Merge two sorted arrays to create a merged sorted array
-void gca_merge(void *_dst, size_t ndst, size_t nsrc, size_t es,
-               int (*compar)(const void *_a, const void *_b, void *_arg),
-               void *arg);
+//
+// Permutations
+//
+
+/*
+ * Permutation example:
+ *
+
+  size_t n = 5;
+  int *d = ...;
+  size_t *p = NULL;
+
+  while(gca_itr_next(&p, n))
+    printf("%i %i %i %i %i", d[p[0]], d[p[1]], d[p[2]], d[p[3]], d[p[4]]);
+
+  // Reset and loop over all permutations again
+  p = gca_itr_reset(p, n);
+  while(gca_itr_next(&p, n))
+    printf("%i %i %i %i %i", d[p[0]], d[p[1]], d[p[2]], d[p[3]], d[p[4]]);
+
+  // release iterator memory
+  free(p);
+
+*/
+
+size_t* gca_itr_reset(size_t *p, size_t n);
+size_t* gca_itr_next(size_t **pp, size_t n);
 
 //
 // binary search
 //
 
-// compar is a function that compares a given value with the value we are
+// searchf is a function that compares a given value with the value we are
 // searching for. It returns <0 if _val is < target, >0 if _val is > target,
 // 0 otherwise.
 void* gca_bsearch(void *_ptr, size_t n, size_t es,
-                  int (*compar)(const void *_val, void *_arg),
+                  int (*searchf)(const void *_val, void *_arg),
                   void *arg);
 
 //
@@ -137,7 +160,7 @@ void gca_qsort(void *base, size_t nel, size_t es,
                int (*compar)(const void *_a, const void *_b, void *_arg),
                void *arg);
 
-// Get k largest from unsorted array, uising quickselect
+// Get the k-th smallest element from unsorted array, using quickselect
 void gca_qselect(void *base, size_t nel, size_t es, size_t kidx,
                  int (*compar)(const void *_a, const void *_b, void *_arg),
                  void *arg);
@@ -170,8 +193,8 @@ void gca_heap_sort(void *heap, size_t nel, size_t es,
 
 //
 // To heapsort an array:
-//   array_heap_make(...)
-//   array_heap_sort(...)
+//   gca_heap_make(...)
+//   gca_heap_sort(...)
 //
 
 //
@@ -189,35 +212,7 @@ void* gca_median5(void *p0, void *p1, void *p2, void *p3, void *p4,
                   void *arg);
 
 //
-// Permutations
-//
-
-/*
- * Permutation example:
- *
-
-  size_t n = 5;
-  int *d = ...;
-  size_t *p = NULL;
-
-  while(carray_itr_next(&p, n))
-    printf("%i %i %i %i %i", d[p[0]], d[p[1]], d[p[2]], d[p[3]], d[p[4]]);
-
-  // Reset and loop over all permutations again
-  p = carray_itr_reset(p, n);
-  while(carray_itr_next(&p, n))
-    printf("%i %i %i %i %i", d[p[0]], d[p[1]], d[p[2]], d[p[3]], d[p[4]]);
-
-  // release iterator memory
-  free(p);
-
-*/
-
-size_t* gca_itr_reset(size_t *p, size_t n);
-size_t* gca_itr_next(size_t **pp, size_t n);
-
-//
-// Insertion sort
+// Insertion sort and merging
 //
 
 /**
@@ -281,6 +276,11 @@ static inline void gca_imerge(void *_ptr, size_t n, size_t m, size_t el,
     if(pj == pi) break;
   }
 }
+
+// Merge two sorted arrays to create a merged sorted array
+void gca_merge(void *_dst, size_t ndst, size_t nsrc, size_t es,
+               int (*compar)(const void *_a, const void *_b, void *_arg),
+               void *arg);
 
 //
 // Check if an array is sorted

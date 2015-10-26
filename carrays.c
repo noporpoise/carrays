@@ -3,6 +3,14 @@
 #include "carrays.h"
 
 //
+// Generic C Arrays
+//
+// All functions have the gca_ prefix
+//
+// 2015-10-24 Isaac Turner (turner.isaac@gmail.com)
+//
+
+//
 // TODO:
 // 1. quickselect using median of medians
 //
@@ -98,9 +106,9 @@ void gca_sample(void *base, size_t n, size_t es, size_t m)
 
 
 // Merge two sorted arrays to create a merged sorted array
-void sarrays_merge(void *_dst, size_t ndst, size_t nsrc, size_t es,
-                   int (*compar)(const void *_a, const void *_b, void *_arg),
-                   void *arg)
+void gca_merge(void *_dst, size_t ndst, size_t nsrc, size_t es,
+               int (*compar)(const void *_a, const void *_b, void *_arg),
+               void *arg)
 {
   char *dst = (char*)_dst, *src = dst+es*ndst, *end = dst+es*(ndst+nsrc);
   if(!nsrc || !ndst) {}
@@ -118,11 +126,11 @@ void sarrays_merge(void *_dst, size_t ndst, size_t nsrc, size_t es,
 }
 
 // binary search
-// compar is a function that compares a given value with the value we are
+// searchf is a function that compares a given value with the value we are
 // searching for. It returns <0 if _val is < target, >0 if _val is > target,
 // 0 otherwise.
 void* gca_bsearch(void *_ptr, size_t n, size_t es,
-                  int (*compar)(const void *_val, void *_arg),
+                  int (*searchf)(const void *_val, void *_arg),
                   void *arg)
 {
   if(n == 0) return NULL;
@@ -134,7 +142,7 @@ void* gca_bsearch(void *_ptr, size_t n, size_t es,
   while(a <= b)
   {
     mid = ptr + es * (((a-ptr) + (b-ptr)) / (2*es));
-    cmp = compar(mid, arg);
+    cmp = searchf(mid, arg);
     if(cmp > 0) b = mid - es;
     else if(cmp < 0) a = mid + es;
     else return mid;
@@ -209,7 +217,7 @@ void gca_qsort(void *base, size_t nel, size_t es,
 // Quickselect
 //
 
-// Get k-th element from unsorted array, uising quickselect
+// Get the k-th smallest element from unsorted array, using quickselect
 void gca_qselect(void *base, size_t nel, size_t es, size_t kidx,
                  int (*compar)(const void *_a, const void *_b, void *_arg),
                  void *arg)
