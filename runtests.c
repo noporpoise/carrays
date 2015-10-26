@@ -165,18 +165,21 @@ void test_bsearch()
   status("Testing binary search...");
 
   #define N 100
-  int i, n, find, arr[N];
-  void *ptr;
+  size_t idx;
+  int i, n, find, arr[N], *found;
   for(i = 0; i < N; i++) arr[i] = i;
 
   find = 20;
-  ptr = gca_bsearch(arr, N, sizeof(arr[0]), gca_search_int, &find);
-  TASSERT(ptr == &arr[find]);
+  found = gca_bsearch(arr, N, sizeof(arr[0]), gca_search_int, &find);
+  idx = found-arr;
+
+  TASSERT(found == &arr[find]);
+  TASSERT(idx == (size_t)find);
 
   for(n = 0; n <= N; n++) {
     for(find = -2; find <= n+2; find++) {
-      ptr = gca_bsearch(arr, n, sizeof(arr[0]), gca_search_int, &find);
-      TASSERT(ptr == (find < 0 || find >= n ? NULL : &arr[find]));
+      found = gca_bsearch(arr, n, sizeof(arr[0]), gca_search_int, &find);
+      TASSERT(found == (find < 0 || find >= n ? NULL : &arr[find]));
     }
   }
   #undef N

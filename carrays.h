@@ -52,7 +52,9 @@ cmpfunc(gca_cmp_int,     gca_cmp2_int,     int,         gca_cmp);
 cmpfunc(gca_cmp_long,    gca_cmp2_long,    long,        gca_cmp);
 cmpfunc(gca_cmp_float,   gca_cmp2_float,   float,       gca_cmp);
 cmpfunc(gca_cmp_double,  gca_cmp2_double,  double,      gca_cmp);
+cmpfunc(gca_cmp_int32,   gca_cmp2_int32,   int32_t,     gca_cmp);
 cmpfunc(gca_cmp_uint32,  gca_cmp2_uint32,  uint32_t,    gca_cmp);
+cmpfunc(gca_cmp_int64,   gca_cmp2_int64,   int64_t,     gca_cmp);
 cmpfunc(gca_cmp_uint64,  gca_cmp2_uint64,  uint64_t,    gca_cmp);
 cmpfunc(gca_cmp_size,    gca_cmp2_size,    size_t,      gca_cmp);
 cmpfunc(gca_cmp_ptr,     gca_cmp2_ptr,     void *const, gca_cmp);
@@ -71,7 +73,9 @@ searchfunc(gca_search_int,     int,         gca_cmp);
 searchfunc(gca_search_long,    long,        gca_cmp);
 searchfunc(gca_search_float,   float,       gca_cmp);
 searchfunc(gca_search_double,  double,      gca_cmp);
+searchfunc(gca_search_int32,   int32_t,     gca_cmp);
 searchfunc(gca_search_uint32,  uint32_t,    gca_cmp);
+searchfunc(gca_search_int64,   int64_t,     gca_cmp);
 searchfunc(gca_search_uint64,  uint64_t,    gca_cmp);
 searchfunc(gca_search_size,    size_t,      gca_cmp);
 searchfunc(gca_search_ptr,     void *const, gca_cmp);
@@ -122,7 +126,7 @@ void gca_sample(void *base, size_t n, size_t es, size_t m);
 
   // Reset and loop over all permutations again
   p = gca_itr_reset(p, n);
-  while(gca_itr_next(&p, n))
+  while(gca_itr_next(&p, n, NULL))
     printf("%i %i %i %i %i", d[p[0]], d[p[1]], d[p[2]], d[p[3]], d[p[4]]);
 
   // release iterator memory
