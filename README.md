@@ -38,12 +38,12 @@ Reverse the order of elements in an array
     void gca_reverse(void *_ptr, size_t n, size_t es)
 
 Sample m elements by moving them to the front of the array.
-Fisher-Yates shuffle. Initiate srand() before calling.
+Fisher-Yates shuffle. Initiate srand48() before calling.
 
     void gca_sample(void *base, size_t n, size_t es, size_t m)
 
 Shuffle entire array.
-Fisher-Yates shuffle. Initiate srand() before calling.
+Fisher-Yates shuffle. Initiate srand48() before calling.
 
     void gca_shuffle(void *base, size_t n, size_t es)
 
