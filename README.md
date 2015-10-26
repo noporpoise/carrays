@@ -1,5 +1,7 @@
 # CArrays: Generic C arrays
 
+[![Build Status](https://travis-ci.org/noporpoise/carrays.svg?branch=master)](https://travis-ci.org/noporpoise/carrays)
+
 Fast algorithms that work on generic C arrays. Public domain license (no waranty, do what you like).
 
 Compile and run tests:
