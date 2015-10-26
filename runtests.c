@@ -428,32 +428,58 @@ void test_next_perm_with_dupes()
 
   size_t *p = NULL, init[] = {0,1,2,2,2};
 
-  check_permutation5(&p,0,1,2,2,2, init);
-  check_permutation5(&p,0,2,1,2,2, init);
-  check_permutation5(&p,0,2,2,1,2, init);
-  check_permutation5(&p,0,2,2,2,1, init);
+  check_permutation5(&p,0,1,2,2,2,init);
+  check_permutation5(&p,0,2,1,2,2,init);
+  check_permutation5(&p,0,2,2,1,2,init);
+  check_permutation5(&p,0,2,2,2,1,init);
 
-  check_permutation5(&p,1,0,2,2,2, init);
-  check_permutation5(&p,1,2,0,2,2, init);
-  check_permutation5(&p,1,2,2,0,2, init);
-  check_permutation5(&p,1,2,2,2,0, init);
+  check_permutation5(&p,1,0,2,2,2,init);
+  check_permutation5(&p,1,2,0,2,2,init);
+  check_permutation5(&p,1,2,2,0,2,init);
+  check_permutation5(&p,1,2,2,2,0,init);
 
-  check_permutation5(&p,2,0,1,2,2, init);
-  check_permutation5(&p,2,0,2,1,2, init);
-  check_permutation5(&p,2,0,2,2,1, init);
-  check_permutation5(&p,2,1,0,2,2, init);
-  check_permutation5(&p,2,1,2,0,2, init);
-  check_permutation5(&p,2,1,2,2,0, init);
+  check_permutation5(&p,2,0,1,2,2,init);
+  check_permutation5(&p,2,0,2,1,2,init);
+  check_permutation5(&p,2,0,2,2,1,init);
+  check_permutation5(&p,2,1,0,2,2,init);
+  check_permutation5(&p,2,1,2,0,2,init);
+  check_permutation5(&p,2,1,2,2,0,init);
 
-  check_permutation5(&p,2,2,0,1,2, init);
-  check_permutation5(&p,2,2,0,2,1, init);
-  check_permutation5(&p,2,2,1,0,2, init);
-  check_permutation5(&p,2,2,1,2,0, init);
+  check_permutation5(&p,2,2,0,1,2,init);
+  check_permutation5(&p,2,2,0,2,1,init);
+  check_permutation5(&p,2,2,1,0,2,init);
+  check_permutation5(&p,2,2,1,2,0,init);
 
-  check_permutation5(&p,2,2,2,0,1, init);
-  check_permutation5(&p,2,2,2,1,0, init);
+  check_permutation5(&p,2,2,2,0,1,init);
+  check_permutation5(&p,2,2,2,1,0,init);
 
-  free(p);
+  TASSERT(gca_itr_next(&p, 5, init) == NULL);
+  TASSERT(gca_itr_next(&p, 5, init) == NULL);
+  // check we can reset and loop back
+  TASSERT(gca_itr_reset(p, 5) == p && p != NULL);
+  check_permutation5(&p,0,1,2,2,2,init);
+  check_permutation5(&p,0,2,1,2,2,init);
+
+  // Try iterating over set of 1s
+  TASSERT(gca_itr_reset(p, 5) == p && p != NULL);
+  init[0] = init[1] = init[2] = init[3] = init[4] = 1;
+  check_permutation5(&p,1,1,1,1,1,init);
+  TASSERT(gca_itr_next(&p, 5, init) == NULL);
+  TASSERT(gca_itr_reset(p, 5) == p && p != NULL);
+  check_permutation5(&p,1,1,1,1,1,init);
+
+  // Iterate over set of 1,1,1,7
+  TASSERT(gca_itr_reset(p, 5) == p && p != NULL);
+  init[0] = init[1] = init[2] = init[3] = init[4] = 1;
+  init[4] = 7;
+  check_permutation5(&p,1,1,1,1,7,init);
+  check_permutation5(&p,1,1,1,7,1,init);
+  check_permutation5(&p,1,1,7,1,1,init);
+  check_permutation5(&p,1,7,1,1,1,init);
+  check_permutation5(&p,7,1,1,1,1,init);
+  TASSERT(gca_itr_next(&p, 5, init) == NULL);
+  TASSERT(gca_itr_reset(p, 5) == p && p != NULL);
+  check_permutation5(&p,1,1,1,1,7,init);
 }
 
 void test_next_permutation()
@@ -616,8 +642,8 @@ void test_next_permutation()
   check_permutation5(&p,0,1,2,4,3,NULL);
 
   free(p);
-
   p = NULL;
+
   TASSERT(gca_itr_next(&p, 2, NULL) == p);
   TASSERT(p[0] == 0 && p[1] == 1);
   TASSERT(gca_itr_next(&p, 2, NULL) == p);
