@@ -1,6 +1,6 @@
 # CArrays: Generic C arrays
 
-Fast algorithms to work on generic C arrays. Public domain license (no waranty, do what you like).
+Fast algorithms that work on generic C arrays. Public domain license (no waranty, do what you like).
 
 Compile and run tests:
 
@@ -25,9 +25,9 @@ Comparison functions take the form:
     int (*compar)(const void *_a, const void *_b, void *_arg)
 
 And should return:
-- < 0 if a < b
-- 0 if a == b
-- > 0 if a > b
+- `<0` if `a < b`
+- `0` if `a == b`
+- `>0` if `a > b`
 
 All functions start with `gca_`, short for Generic C Array.
 
@@ -52,10 +52,23 @@ shift functions.  http://en.wikipedia.org/wiki/Binary_GCD_algorithm
 
     uint32_t gca_calc_GCD(uint32_t a, uint32_t b)
 
+Round integer up to nearest power of two:
+
+    uint32_t gca_roundup32(uint32_t x)
+    uint64_t gca_roundup64(uint64_t x)
+
 ### Cycle shift
+
+Cycle shift using only one read/write per element.
 
     void gca_cycle_left(void *_ptr, size_t n, size_t es, size_t shift)
     void gca_cycle_right(void *_ptr, size_t n, size_t es, size_t shift)
+
+Naive implementations using three reverses, uses two read/writes per element:
+
+    gca_reverse(base, shift, es)
+    gca_reverse(base, n-shift, es)
+    gca_reverse(base, n, es)
 
 ### Permutation Iteration
 
@@ -77,7 +90,7 @@ Iteration example:
     // after each call to gca_itr_next, p={0,1,2,3}, then {0,1,3,2} ...
     // in numerical order
     p = gca_itr_reset(p, n);
-    while(gca_itr_next(&p, n))
+    while(gca_itr_next(&p, n, NULL))
       printf("%i %i %i %i %i", d[p[0]], d[p[1]], d[p[2]], d[p[3]], d[p[4]]);
 
     // release iterator memory
@@ -114,25 +127,37 @@ Get the k-th smallest element from unsorted array, using quickselect:
                      int (*compar)(const void *_a, const void *_b, void *_arg),
                      void *arg)
 
+`gca_qselect(...)` is used to find the median of an array in `gca_median(...)`.
+
+### Median
+
+Get pointer to median of three elements, using three comparisons:
+
+    void* gca_median3(void *p0, void *p1, void *p2,
+                      int (*compar)(const void *_a, const void *_b, void *_arg),
+                      void *arg)
+
+Get pointer to median of five elements, using six comparisons:
+
+    void* gca_median5(void *p0, void *p1, void *p2, void *p3, void *p4,
+                      int (*compar)(const void *_a, const void *_b, void *_arg),
+                      void *arg)
+
+Macro for getting median of an array using `gca_qselect()` (Undefined for `nel==0`):
+
+    gca_median(base,nel,compar,arg,type,avgfunc)
+
+Or the safer wrapper (returns `(type)(zero)` if `nel == 0`):
+
+  #define gca_median2(base,nel,compar,arg,type,avgfunc,zero)
+
+Get median of array of `int`s:
+
+    #define avgfunc(a,b) ((a)+(b)+1.0)/2.0)
+    int n = 10, arr[] = {...};
+    int median = gca_median2(arr, n, gca_cmp2_int, NULL, int, avgfunc, 0)
+
 ### Heaps
-
-Get index of parent / child of a given element:
-
-    gca_heap_parent(idx)
-    gca_heap_child1(idx)
-    gca_heap_child2(idx)
-
-New element at index nel-1, to be pushed up the heap:
-
-    void gca_heap_pushup(void *heap, size_t nel, size_t es,
-                         int (*compar)(const void *_a, const void *_b, void *_arg),
-                         void *arg)
-
-New element at index 0, to be pushed down the heap
-
-    void gca_heap_pushdwn(void *heap, size_t nel, size_t es,
-                          int (*compar)(const void *_a, const void *_b, void *_arg),
-                          void *arg)
 
 Build a heap from an unsorted array:
 
@@ -151,6 +176,26 @@ To heapsort an array:
     gca_heap_make(...)
     gca_heap_sort(...)
 
+Get index of parent / child of a given element:
+
+    gca_heap_parent(idx)
+    gca_heap_child1(idx)
+    gca_heap_child2(idx)
+
+New element at index `nel-1`, to be pushed up the heap:
+
+    void gca_heap_pushup(void *heap, size_t nel, size_t es,
+                         int (*compar)(const void *_a, const void *_b, void *_arg),
+                         void *arg)
+
+New element at index 0, to be pushed down the heap:
+
+    void gca_heap_pushdwn(void *heap, size_t nel, size_t es,
+                          int (*compar)(const void *_a, const void *_b, void *_arg),
+                          void *arg)
+
+Where possible, use `pushdwn()` rather than `pushup()` as it has better complexity.
+
 ### Insertion sort
 
 Insertion sort, sorted elements first, then unsorted. Parameters:
@@ -160,6 +205,8 @@ Insertion sort, sorted elements first, then unsorted. Parameters:
 - el is element size
 - compar is comparison function
 - arg is pointer to pass to comparison function
+
+Call:
 
     void gca_isortr(void *_ptr, size_t n, size_t m, size_t el,
                     int (*compar)(const void *_a, const void *_b, void *_arg),
@@ -172,6 +219,8 @@ Insertion sort unsorted elements first, then sorted.
 - el is element size
 - compar is comparison function
 - arg is pointer to pass to comparison function
+
+Call:
 
     void gca_isortf(void *_ptr, size_t n, size_t m, size_t el,
                     int (*compar)(const void *_a, const void *_b, void *_arg),
@@ -186,6 +235,8 @@ Insertion sort merging between two adjacent sorted arrays
 - compar is comparison function
 - arg is pointer to pass to comparison function
 
+Call:
+
     void gca_imerge(void *_ptr, size_t n, size_t m, size_t el,
                     int (*compar)(const void *_a, const void *_b, void *_arg),
                     void *arg)
@@ -195,20 +246,6 @@ Merge two sorted arrays to create a merged sorted array:
     void gca_merge(void *_dst, size_t ndst, size_t nsrc, size_t es,
                    int (*compar)(const void *_a, const void *_b, void *_arg),
                    void *arg)
-
-### Median
-
-Get pointer to median of three elements, using three comparisons:
-
-    void* gca_median3(void *p0, void *p1, void *p2,
-                      int (*compar)(const void *_a, const void *_b, void *_arg),
-                      void *arg)
-
-Get pointer to median of five elements, using six comparisons:
-
-    void* gca_median5(void *p0, void *p1, void *p2, void *p3, void *p4,
-                      int (*compar)(const void *_a, const void *_b, void *_arg),
-                      void *arg)
 
 ### Testing if sorted
 
@@ -225,6 +262,18 @@ Test if an array is reverse sorted, given a comparison function:
                                       void *_arg),
                         void *arg)
 
+Get pointer to max entry using comparison function:
+
+    void* gca_max(void *base, size_t nel, size_t es,
+                  int (*compar)(const void *_a, const void *_b, void *_arg),
+                  void *arg)
+
+Get pointer to min entry using comparison function:
+
+    void* gca_min(void *base, size_t nel, size_t es,
+                  int (*compar)(const void *_a, const void *_b, void *_arg),
+                  void *arg)
+
 ## Development
 
 Please submit suggestions, requests and bug reports through Github or email me:
@@ -234,7 +283,7 @@ Please submit suggestions, requests and bug reports through Github or email me:
 Pull requests and bug reports very welcome.
 
 TODO:
-[ ] Quickselect using median of medians: gca_qselect_mmed(...)
+- [ ] Quickselect using median of medians: `gca_qselect_mmed(...)`
 
 License
 =======

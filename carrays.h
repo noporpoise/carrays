@@ -131,7 +131,7 @@ void gca_sample(void *base, size_t n, size_t es, size_t m);
 */
 
 size_t* gca_itr_reset(size_t *p, size_t n);
-size_t* gca_itr_next(size_t **pp, size_t n);
+size_t* gca_itr_next(size_t **pp, size_t n, size_t *init);
 
 //
 // binary search
@@ -161,9 +161,28 @@ void gca_qsort(void *base, size_t nel, size_t es,
                void *arg);
 
 // Get the k-th smallest element from unsorted array, using quickselect
-void gca_qselect(void *base, size_t nel, size_t es, size_t kidx,
-                 int (*compar)(const void *_a, const void *_b, void *_arg),
-                 void *arg);
+void* gca_qselect(void *base, size_t nel, size_t es, size_t kidx,
+                  int (*compar)(const void *_a, const void *_b, void *_arg),
+                  void *arg);
+
+/*
+ Get median of array of size_t:
+
+    #define avgfunc(a,b) ((a)+(b)+1.0)/2.0)
+    size_t arr[], n = 10;
+    size_t median = gca_median(arr, n, gca_cmp2_size, NULL, size_t, avgfunc)
+*/
+
+// Undefined if nel == 0
+#define gca_median(base,nel,compar,arg,type,avgfunc) \
+  (gca_qselect(base,nel,sizeof(type),(nel)/2,compar,arg), \
+   ((nel)&1 ? *((type*)(base) + (nel)/2) \
+            : (type)avgfunc(*(type*)gca_max((base),(nel)/2,sizeof(type),compar,arg), \
+                            *((type*)(base) + (nel)/2))))
+
+// Returns (type)(zero) if nel == 0
+#define gca_median2(base,nel,compar,arg,type,avgfunc,zero) \
+        (nel ? gca_median(base,nel,compar,arg,type,avgfunc) : (type)(zero))
 
 //
 // Heapsort
@@ -307,6 +326,32 @@ static inline bool gca_is_rsorted(void *base, size_t nel, size_t es,
     if(compar(ptr, ptr+es, arg) < 0)
       return false;
   return true;
+}
+
+// Get pointer to max entry using comparison function
+static inline void* gca_max(void *base, size_t nel, size_t es,
+                            int (*compar)(const void *_a, const void *_b,
+                                          void *_arg),
+                            void *arg)
+{
+  char *b = (char*)base, *end = b+es*nel, *ptr, *max = base;
+  for(ptr = b+es; ptr < end; ptr += es)
+    if(compar(max, ptr, arg) < 0)
+      max = ptr;
+  return max;
+}
+
+// Get pointer to min entry using comparison function
+static inline void* gca_min(void *base, size_t nel, size_t es,
+                            int (*compar)(const void *_a, const void *_b,
+                                          void *_arg),
+                            void *arg)
+{
+  char *b = (char*)base, *end = b+es*nel, *ptr, *min = base;
+  for(ptr = b+es; ptr < end; ptr += es)
+    if(compar(min, ptr, arg) > 0)
+      min = ptr;
+  return min;
 }
 
 #endif /* CARRAYS_H_ */

@@ -1,7 +1,10 @@
 #include <stdio.h>
-#include <stdbool.h>
 #include "circ_array.h"
 #include "carrays.h"
+
+// seeding random
+#include <sys/time.h> // for seeding random
+#include <unistd.h> // getpid()
 
 size_t num_tests_run = 0, num_tests_failed = 0;
 
@@ -335,7 +338,7 @@ void test_median5()
   size_t i, m = 2, *itr = NULL;
 
   // 5*4*3*2*1 = 120 perumations
-  for(i = 0; gca_itr_next(&itr, 5); i++)
+  for(i = 0; gca_itr_next(&itr, 5, NULL); i++)
     check_median(itr, m);
 
   TASSERT(i == 5*4*3*2*1);
@@ -351,11 +354,103 @@ void test_median5()
   arrset5(arr, 10, 10, 9,  8,  7); check_median(arr, 9);
 }
 
-void check_permutation5(size_t **pp, size_t a, size_t b, size_t c, size_t d, size_t e)
+// size_t avgfunc(size_t a, size_t b) {
+//   status("a=%zu b=%zu", a, b);
+//   return (a+b+1.0)/2.0;
+// }
+
+void test_median()
 {
-  size_t *p = gca_itr_next(pp, 5);
+  #define avgfunc(a,b) (((a)+(b)+1.0)/2.0)
+  #define N 10
+  #define NTESTS 4
+  size_t arr[N], i, t, n;
+
+  arr[0] = 1; arr[1] = 5; arr[2] = 4;
+  TASSERT(gca_median2(arr, 0, gca_cmp2_size, NULL, size_t, avgfunc, 0) == 0);
+  TASSERT(gca_median2(arr, 1, gca_cmp2_size, NULL, size_t, avgfunc, 0) == 1);
+  TASSERT(gca_median2(arr, 2, gca_cmp2_size, NULL, size_t, avgfunc, 0) == 3);
+  TASSERT(gca_median2(arr, 3, gca_cmp2_size, NULL, size_t, avgfunc, 0) == 4);
+
+  // 7, 7, ... 7, 7
+  for(i = 0; i < N; i++) arr[i] = 7;
+  for(n = 1; n <= N; n++)
+    TASSERT(gca_median(arr, n, gca_cmp2_size, NULL, size_t, avgfunc) == 7);
+
+  // 0, 1, ... 8, 9
+  for(i = 0; i < N; i++) arr[i] = i;
+  TASSERT(gca_median2(arr, 0, gca_cmp2_size, NULL, size_t, avgfunc, SIZE_MAX) == SIZE_MAX);
+  TASSERT(gca_median2(arr, 0, gca_cmp2_size, NULL, size_t, avgfunc, 0) == 0);
+  TASSERT(gca_median(arr, 1, gca_cmp2_size, NULL, size_t, avgfunc) == 0);
+  TASSERT(gca_median(arr, 2, gca_cmp2_size, NULL, size_t, avgfunc) == 1);
+  TASSERT(gca_median(arr, 3, gca_cmp2_size, NULL, size_t, avgfunc) == 1);
+  TASSERT(gca_median(arr, 4, gca_cmp2_size, NULL, size_t, avgfunc) == 2);
+
+  for(t = 0; t < NTESTS; t++)
+  {
+    // (4 + 5) / 2 = 9/2 = 4.5 => 5
+    for(i = 0; i < N; i++) arr[i] = i;
+    gca_shuffle(arr, N, sizeof(arr[0]));
+    TASSERT(gca_median(arr, N, gca_cmp2_size, NULL, size_t, avgfunc) == 5);
+
+    // 0, 2, ... 16, 18
+    // (2*4 + 2*5) / 2 = (8+10) / 2 = 18/2 = 9
+    for(i = 0; i < N; i++) arr[i] = 2*i;
+    gca_shuffle(arr, N, sizeof(arr[0]));
+    TASSERT(gca_median(arr, N, gca_cmp2_size, NULL, size_t, avgfunc) == 9);
+
+    // 0, 3, ... 24, 27
+    // (3*4 + 3*5) / 2 = (12+15) / 2 = 27/2 = 13.5 => 14
+    for(i = 0; i < N; i++) arr[i] = 3*i;
+    gca_shuffle(arr, N, sizeof(arr[0]));
+    TASSERT(gca_median(arr, N, gca_cmp2_size, NULL, size_t, avgfunc) == 14);
+  }
+  #undef N
+}
+
+
+void check_permutation5(size_t **pp, size_t a, size_t b, size_t c, size_t d, size_t e,
+                        size_t *init)
+{
+  size_t *p = gca_itr_next(pp, 5, init);
   TASSERT(p != NULL);
-  TASSERT(p[0] == a && p[1] == b && p[2] == c && p[3] == d && p[4] == e);
+  bool nxtpermut = p[0] == a && p[1] == b && p[2] == c && p[3] == d && p[4] == e;
+  TASSERT2(nxtpermut, "%zu %zu %zu %zu %zu / %zu %zu %zu %zu %zu\n",
+           p[0], p[1], p[2], p[3], p[4], a, b, c, d, e);
+}
+
+void test_next_perm_with_dupes()
+{
+  status("Testing next permutation with duplicates...");
+
+  size_t *p = NULL, init[] = {0,1,2,2,2};
+
+  check_permutation5(&p,0,1,2,2,2, init);
+  check_permutation5(&p,0,2,1,2,2, init);
+  check_permutation5(&p,0,2,2,1,2, init);
+  check_permutation5(&p,0,2,2,2,1, init);
+
+  check_permutation5(&p,1,0,2,2,2, init);
+  check_permutation5(&p,1,2,0,2,2, init);
+  check_permutation5(&p,1,2,2,0,2, init);
+  check_permutation5(&p,1,2,2,2,0, init);
+
+  check_permutation5(&p,2,0,1,2,2, init);
+  check_permutation5(&p,2,0,2,1,2, init);
+  check_permutation5(&p,2,0,2,2,1, init);
+  check_permutation5(&p,2,1,0,2,2, init);
+  check_permutation5(&p,2,1,2,0,2, init);
+  check_permutation5(&p,2,1,2,2,0, init);
+
+  check_permutation5(&p,2,2,0,1,2, init);
+  check_permutation5(&p,2,2,0,2,1, init);
+  check_permutation5(&p,2,2,1,0,2, init);
+  check_permutation5(&p,2,2,1,2,0, init);
+
+  check_permutation5(&p,2,2,2,0,1, init);
+  check_permutation5(&p,2,2,2,1,0, init);
+
+  free(p);
 }
 
 void test_next_permutation()
@@ -365,172 +460,172 @@ void test_next_permutation()
   size_t i, n;
   size_t *p = NULL;
 
-  check_permutation5(&p,0,1,2,3,4);
-  check_permutation5(&p,0,1,2,4,3);
-  check_permutation5(&p,0,1,3,2,4);
-  check_permutation5(&p,0,1,3,4,2);
-  check_permutation5(&p,0,1,4,2,3);
-  check_permutation5(&p,0,1,4,3,2);
+  check_permutation5(&p,0,1,2,3,4,NULL);
+  check_permutation5(&p,0,1,2,4,3,NULL);
+  check_permutation5(&p,0,1,3,2,4,NULL);
+  check_permutation5(&p,0,1,3,4,2,NULL);
+  check_permutation5(&p,0,1,4,2,3,NULL);
+  check_permutation5(&p,0,1,4,3,2,NULL);
 
-  check_permutation5(&p,0,2,1,3,4);
-  check_permutation5(&p,0,2,1,4,3);
-  check_permutation5(&p,0,2,3,1,4);
-  check_permutation5(&p,0,2,3,4,1);
-  check_permutation5(&p,0,2,4,1,3);
-  check_permutation5(&p,0,2,4,3,1);
+  check_permutation5(&p,0,2,1,3,4,NULL);
+  check_permutation5(&p,0,2,1,4,3,NULL);
+  check_permutation5(&p,0,2,3,1,4,NULL);
+  check_permutation5(&p,0,2,3,4,1,NULL);
+  check_permutation5(&p,0,2,4,1,3,NULL);
+  check_permutation5(&p,0,2,4,3,1,NULL);
 
-  check_permutation5(&p,0,3,1,2,4);
-  check_permutation5(&p,0,3,1,4,2);
-  check_permutation5(&p,0,3,2,1,4);
-  check_permutation5(&p,0,3,2,4,1);
-  check_permutation5(&p,0,3,4,1,2);
-  check_permutation5(&p,0,3,4,2,1);
+  check_permutation5(&p,0,3,1,2,4,NULL);
+  check_permutation5(&p,0,3,1,4,2,NULL);
+  check_permutation5(&p,0,3,2,1,4,NULL);
+  check_permutation5(&p,0,3,2,4,1,NULL);
+  check_permutation5(&p,0,3,4,1,2,NULL);
+  check_permutation5(&p,0,3,4,2,1,NULL);
 
-  check_permutation5(&p,0,4,1,2,3);
-  check_permutation5(&p,0,4,1,3,2);
-  check_permutation5(&p,0,4,2,1,3);
-  check_permutation5(&p,0,4,2,3,1);
-  check_permutation5(&p,0,4,3,1,2);
-  check_permutation5(&p,0,4,3,2,1);
-
-  //
-  check_permutation5(&p,1,0,2,3,4);
-  check_permutation5(&p,1,0,2,4,3);
-  check_permutation5(&p,1,0,3,2,4);
-  check_permutation5(&p,1,0,3,4,2);
-  check_permutation5(&p,1,0,4,2,3);
-  check_permutation5(&p,1,0,4,3,2);
-
-  check_permutation5(&p,1,2,0,3,4);
-  check_permutation5(&p,1,2,0,4,3);
-  check_permutation5(&p,1,2,3,0,4);
-  check_permutation5(&p,1,2,3,4,0);
-  check_permutation5(&p,1,2,4,0,3);
-  check_permutation5(&p,1,2,4,3,0);
-
-  check_permutation5(&p,1,3,0,2,4);
-  check_permutation5(&p,1,3,0,4,2);
-  check_permutation5(&p,1,3,2,0,4);
-  check_permutation5(&p,1,3,2,4,0);
-  check_permutation5(&p,1,3,4,0,2);
-  check_permutation5(&p,1,3,4,2,0);
-
-  check_permutation5(&p,1,4,0,2,3);
-  check_permutation5(&p,1,4,0,3,2);
-  check_permutation5(&p,1,4,2,0,3);
-  check_permutation5(&p,1,4,2,3,0);
-  check_permutation5(&p,1,4,3,0,2);
-  check_permutation5(&p,1,4,3,2,0);
+  check_permutation5(&p,0,4,1,2,3,NULL);
+  check_permutation5(&p,0,4,1,3,2,NULL);
+  check_permutation5(&p,0,4,2,1,3,NULL);
+  check_permutation5(&p,0,4,2,3,1,NULL);
+  check_permutation5(&p,0,4,3,1,2,NULL);
+  check_permutation5(&p,0,4,3,2,1,NULL);
 
   //
-  check_permutation5(&p,2,0,1,3,4);
-  check_permutation5(&p,2,0,1,4,3);
-  check_permutation5(&p,2,0,3,1,4);
-  check_permutation5(&p,2,0,3,4,1);
-  check_permutation5(&p,2,0,4,1,3);
-  check_permutation5(&p,2,0,4,3,1);
+  check_permutation5(&p,1,0,2,3,4,NULL);
+  check_permutation5(&p,1,0,2,4,3,NULL);
+  check_permutation5(&p,1,0,3,2,4,NULL);
+  check_permutation5(&p,1,0,3,4,2,NULL);
+  check_permutation5(&p,1,0,4,2,3,NULL);
+  check_permutation5(&p,1,0,4,3,2,NULL);
 
-  check_permutation5(&p,2,1,0,3,4);
-  check_permutation5(&p,2,1,0,4,3);
-  check_permutation5(&p,2,1,3,0,4);
-  check_permutation5(&p,2,1,3,4,0);
-  check_permutation5(&p,2,1,4,0,3);
-  check_permutation5(&p,2,1,4,3,0);
+  check_permutation5(&p,1,2,0,3,4,NULL);
+  check_permutation5(&p,1,2,0,4,3,NULL);
+  check_permutation5(&p,1,2,3,0,4,NULL);
+  check_permutation5(&p,1,2,3,4,0,NULL);
+  check_permutation5(&p,1,2,4,0,3,NULL);
+  check_permutation5(&p,1,2,4,3,0,NULL);
 
-  check_permutation5(&p,2,3,0,1,4);
-  check_permutation5(&p,2,3,0,4,1);
-  check_permutation5(&p,2,3,1,0,4);
-  check_permutation5(&p,2,3,1,4,0);
-  check_permutation5(&p,2,3,4,0,1);
-  check_permutation5(&p,2,3,4,1,0);
+  check_permutation5(&p,1,3,0,2,4,NULL);
+  check_permutation5(&p,1,3,0,4,2,NULL);
+  check_permutation5(&p,1,3,2,0,4,NULL);
+  check_permutation5(&p,1,3,2,4,0,NULL);
+  check_permutation5(&p,1,3,4,0,2,NULL);
+  check_permutation5(&p,1,3,4,2,0,NULL);
 
-  check_permutation5(&p,2,4,0,1,3);
-  check_permutation5(&p,2,4,0,3,1);
-  check_permutation5(&p,2,4,1,0,3);
-  check_permutation5(&p,2,4,1,3,0);
-  check_permutation5(&p,2,4,3,0,1);
-  check_permutation5(&p,2,4,3,1,0);
-
-  //
-  check_permutation5(&p,3,0,1,2,4);
-  check_permutation5(&p,3,0,1,4,2);
-  check_permutation5(&p,3,0,2,1,4);
-  check_permutation5(&p,3,0,2,4,1);
-  check_permutation5(&p,3,0,4,1,2);
-  check_permutation5(&p,3,0,4,2,1);
-
-  check_permutation5(&p,3,1,0,2,4);
-  check_permutation5(&p,3,1,0,4,2);
-  check_permutation5(&p,3,1,2,0,4);
-  check_permutation5(&p,3,1,2,4,0);
-  check_permutation5(&p,3,1,4,0,2);
-  check_permutation5(&p,3,1,4,2,0);
-
-  check_permutation5(&p,3,2,0,1,4);
-  check_permutation5(&p,3,2,0,4,1);
-  check_permutation5(&p,3,2,1,0,4);
-  check_permutation5(&p,3,2,1,4,0);
-  check_permutation5(&p,3,2,4,0,1);
-  check_permutation5(&p,3,2,4,1,0);
-
-  check_permutation5(&p,3,4,0,1,2);
-  check_permutation5(&p,3,4,0,2,1);
-  check_permutation5(&p,3,4,1,0,2);
-  check_permutation5(&p,3,4,1,2,0);
-  check_permutation5(&p,3,4,2,0,1);
-  check_permutation5(&p,3,4,2,1,0);
+  check_permutation5(&p,1,4,0,2,3,NULL);
+  check_permutation5(&p,1,4,0,3,2,NULL);
+  check_permutation5(&p,1,4,2,0,3,NULL);
+  check_permutation5(&p,1,4,2,3,0,NULL);
+  check_permutation5(&p,1,4,3,0,2,NULL);
+  check_permutation5(&p,1,4,3,2,0,NULL);
 
   //
-  check_permutation5(&p,4,0,1,2,3);
-  check_permutation5(&p,4,0,1,3,2);
-  check_permutation5(&p,4,0,2,1,3);
-  check_permutation5(&p,4,0,2,3,1);
-  check_permutation5(&p,4,0,3,1,2);
-  check_permutation5(&p,4,0,3,2,1);
+  check_permutation5(&p,2,0,1,3,4,NULL);
+  check_permutation5(&p,2,0,1,4,3,NULL);
+  check_permutation5(&p,2,0,3,1,4,NULL);
+  check_permutation5(&p,2,0,3,4,1,NULL);
+  check_permutation5(&p,2,0,4,1,3,NULL);
+  check_permutation5(&p,2,0,4,3,1,NULL);
 
-  check_permutation5(&p,4,1,0,2,3);
-  check_permutation5(&p,4,1,0,3,2);
-  check_permutation5(&p,4,1,2,0,3);
-  check_permutation5(&p,4,1,2,3,0);
-  check_permutation5(&p,4,1,3,0,2);
-  check_permutation5(&p,4,1,3,2,0);
+  check_permutation5(&p,2,1,0,3,4,NULL);
+  check_permutation5(&p,2,1,0,4,3,NULL);
+  check_permutation5(&p,2,1,3,0,4,NULL);
+  check_permutation5(&p,2,1,3,4,0,NULL);
+  check_permutation5(&p,2,1,4,0,3,NULL);
+  check_permutation5(&p,2,1,4,3,0,NULL);
 
-  check_permutation5(&p,4,2,0,1,3);
-  check_permutation5(&p,4,2,0,3,1);
-  check_permutation5(&p,4,2,1,0,3);
-  check_permutation5(&p,4,2,1,3,0);
-  check_permutation5(&p,4,2,3,0,1);
-  check_permutation5(&p,4,2,3,1,0);
+  check_permutation5(&p,2,3,0,1,4,NULL);
+  check_permutation5(&p,2,3,0,4,1,NULL);
+  check_permutation5(&p,2,3,1,0,4,NULL);
+  check_permutation5(&p,2,3,1,4,0,NULL);
+  check_permutation5(&p,2,3,4,0,1,NULL);
+  check_permutation5(&p,2,3,4,1,0,NULL);
 
-  check_permutation5(&p,4,3,0,1,2);
-  check_permutation5(&p,4,3,0,2,1);
-  check_permutation5(&p,4,3,1,0,2);
-  check_permutation5(&p,4,3,1,2,0);
-  check_permutation5(&p,4,3,2,0,1);
-  check_permutation5(&p,4,3,2,1,0);
+  check_permutation5(&p,2,4,0,1,3,NULL);
+  check_permutation5(&p,2,4,0,3,1,NULL);
+  check_permutation5(&p,2,4,1,0,3,NULL);
+  check_permutation5(&p,2,4,1,3,0,NULL);
+  check_permutation5(&p,2,4,3,0,1,NULL);
+  check_permutation5(&p,2,4,3,1,0,NULL);
 
-  TASSERT(gca_itr_next(&p, 5) == NULL);
-  TASSERT(gca_itr_next(&p, 5) == NULL);
-  TASSERT(gca_itr_next(&p, 5) == NULL);
+  //
+  check_permutation5(&p,3,0,1,2,4,NULL);
+  check_permutation5(&p,3,0,1,4,2,NULL);
+  check_permutation5(&p,3,0,2,1,4,NULL);
+  check_permutation5(&p,3,0,2,4,1,NULL);
+  check_permutation5(&p,3,0,4,1,2,NULL);
+  check_permutation5(&p,3,0,4,2,1,NULL);
+
+  check_permutation5(&p,3,1,0,2,4,NULL);
+  check_permutation5(&p,3,1,0,4,2,NULL);
+  check_permutation5(&p,3,1,2,0,4,NULL);
+  check_permutation5(&p,3,1,2,4,0,NULL);
+  check_permutation5(&p,3,1,4,0,2,NULL);
+  check_permutation5(&p,3,1,4,2,0,NULL);
+
+  check_permutation5(&p,3,2,0,1,4,NULL);
+  check_permutation5(&p,3,2,0,4,1,NULL);
+  check_permutation5(&p,3,2,1,0,4,NULL);
+  check_permutation5(&p,3,2,1,4,0,NULL);
+  check_permutation5(&p,3,2,4,0,1,NULL);
+  check_permutation5(&p,3,2,4,1,0,NULL);
+
+  check_permutation5(&p,3,4,0,1,2,NULL);
+  check_permutation5(&p,3,4,0,2,1,NULL);
+  check_permutation5(&p,3,4,1,0,2,NULL);
+  check_permutation5(&p,3,4,1,2,0,NULL);
+  check_permutation5(&p,3,4,2,0,1,NULL);
+  check_permutation5(&p,3,4,2,1,0,NULL);
+
+  //
+  check_permutation5(&p,4,0,1,2,3,NULL);
+  check_permutation5(&p,4,0,1,3,2,NULL);
+  check_permutation5(&p,4,0,2,1,3,NULL);
+  check_permutation5(&p,4,0,2,3,1,NULL);
+  check_permutation5(&p,4,0,3,1,2,NULL);
+  check_permutation5(&p,4,0,3,2,1,NULL);
+
+  check_permutation5(&p,4,1,0,2,3,NULL);
+  check_permutation5(&p,4,1,0,3,2,NULL);
+  check_permutation5(&p,4,1,2,0,3,NULL);
+  check_permutation5(&p,4,1,2,3,0,NULL);
+  check_permutation5(&p,4,1,3,0,2,NULL);
+  check_permutation5(&p,4,1,3,2,0,NULL);
+
+  check_permutation5(&p,4,2,0,1,3,NULL);
+  check_permutation5(&p,4,2,0,3,1,NULL);
+  check_permutation5(&p,4,2,1,0,3,NULL);
+  check_permutation5(&p,4,2,1,3,0,NULL);
+  check_permutation5(&p,4,2,3,0,1,NULL);
+  check_permutation5(&p,4,2,3,1,0,NULL);
+
+  check_permutation5(&p,4,3,0,1,2,NULL);
+  check_permutation5(&p,4,3,0,2,1,NULL);
+  check_permutation5(&p,4,3,1,0,2,NULL);
+  check_permutation5(&p,4,3,1,2,0,NULL);
+  check_permutation5(&p,4,3,2,0,1,NULL);
+  check_permutation5(&p,4,3,2,1,0,NULL);
+
+  TASSERT(gca_itr_next(&p, 5, NULL) == NULL);
+  TASSERT(gca_itr_next(&p, 5, NULL) == NULL);
+  TASSERT(gca_itr_next(&p, 5, NULL) == NULL);
 
   TASSERT(gca_itr_reset(p, 5) == p && p != NULL);
-  check_permutation5(&p,0,1,2,3,4);
-  check_permutation5(&p,0,1,2,4,3);
+  check_permutation5(&p,0,1,2,3,4,NULL);
+  check_permutation5(&p,0,1,2,4,3,NULL);
 
   free(p);
 
   p = NULL;
-  TASSERT(gca_itr_next(&p, 2) == p);
+  TASSERT(gca_itr_next(&p, 2, NULL) == p);
   TASSERT(p[0] == 0 && p[1] == 1);
-  TASSERT(gca_itr_next(&p, 2) == p);
+  TASSERT(gca_itr_next(&p, 2, NULL) == p);
   TASSERT(p[0] == 1 && p[1] == 0);
-  TASSERT(gca_itr_next(&p, 2) == NULL);
-  TASSERT(gca_itr_next(&p, 2) == NULL);
+  TASSERT(gca_itr_next(&p, 2, NULL) == NULL);
+  TASSERT(gca_itr_next(&p, 2, NULL) == NULL);
 
   p = gca_itr_reset(p, 2);
-  TASSERT(gca_itr_next(&p, 2) == p);
+  TASSERT(gca_itr_next(&p, 2, NULL) == p);
   TASSERT(p[0] == 0 && p[1] == 1);
-  TASSERT(gca_itr_next(&p, 2) == p);
+  TASSERT(gca_itr_next(&p, 2, NULL) == p);
   TASSERT(p[0] == 1 && p[1] == 0);
   free(p);
 
@@ -538,24 +633,44 @@ void test_next_permutation()
   for(n = 0; n < 5; n++)
   {
     p = gca_itr_reset(NULL, n);
-    TASSERT(gca_itr_next(&p, n) == (n ? p : NULL));
+    TASSERT(gca_itr_next(&p, n, NULL) == (n ? p : NULL));
     for(i = 0; i < n; i++) TASSERT(p[i] == i);
     // reuse
     p = gca_itr_reset(p, n);
-    TASSERT(gca_itr_next(&p, n) == (n ? p : NULL));
+    TASSERT(gca_itr_next(&p, n, NULL) == (n ? p : NULL));
     for(i = 0; i < n; i++) TASSERT(p[i] == i);
     free(p);
 
     // initialise without gca_itr_reset()
     p = NULL;
-    TASSERT(gca_itr_next(&p, n) == (n ? p : NULL));
+    TASSERT(gca_itr_next(&p, n, NULL) == (n ? p : NULL));
     for(i = 0; i < n; i++) TASSERT(p[i] == i);
     free(p);
   }
 }
 
+#define strhash_fast_mix(h,x) ((h) * 37 + (x))
+#define rotl32(h,r) ((h)<<(r)|(h)>>(32-(r)))
+
+static inline uint32_t get_rand_seed()
+{
+  struct timeval now;
+  gettimeofday(&now, NULL);
+
+  uint32_t h = rand();
+  h = strhash_fast_mix(h, rotl32((uint32_t)now.tv_sec,  h & 31));
+  h = strhash_fast_mix(h, rotl32((uint32_t)now.tv_usec, h & 31));
+  h = strhash_fast_mix(h, (uint32_t)getpid());
+  return h;
+}
+
 int main()
 {
+  uint32_t seed32 = get_rand_seed();
+  srand48(seed32);
+  srand(seed32);
+  status("Random seed = %u", seed32);
+
   status("Running tests...");
   test_round();
   test_GCD();
@@ -567,9 +682,11 @@ int main()
   test_quickselect();
   test_heapsort();
   test_median5();
+  test_median();
   test_next_permutation();
+  test_next_perm_with_dupes();
   status("Passed: %zu / %zu (%s)", num_tests_run-num_tests_failed, num_tests_run,
-         !num_tests_failed ? "all" : (num_tests_failed<num_tests_run ? "some" : "none"));
+         !num_tests_failed ? "All" : (num_tests_failed<num_tests_run ? "Some" : "None"));
   status("Done.");
 
   return num_tests_failed ? -1 : 0;

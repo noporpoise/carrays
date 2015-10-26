@@ -218,15 +218,15 @@ void gca_qsort(void *base, size_t nel, size_t es,
 //
 
 // Get the k-th smallest element from unsorted array, using quickselect
-void gca_qselect(void *base, size_t nel, size_t es, size_t kidx,
-                 int (*compar)(const void *_a, const void *_b, void *_arg),
-                 void *arg)
+void* gca_qselect(void *base, size_t nel, size_t es, size_t kidx,
+                  int (*compar)(const void *_a, const void *_b, void *_arg),
+                  void *arg)
 {
   char *b = (char*)base;
   size_t pidx, l = 0, r = nel-1;
 
   assert(kidx < nel);
-  if(nel <= 1) return;
+  if(nel <= 1) return b;
 
   while(1)
   {
@@ -241,6 +241,8 @@ void gca_qselect(void *base, size_t nel, size_t es, size_t kidx,
     else if(pidx < kidx) l = pidx+1;
     else break;
   }
+
+  return b+es*kidx;
 }
 
 // Get k-th element from unsorted array, using quickselect and median of medians
@@ -370,26 +372,29 @@ size_t* gca_itr_reset(size_t *p, size_t n)
   return p;
 }
 
-size_t* gca_itr_next(size_t **pp, size_t n)
+size_t* gca_itr_next(size_t **pp, size_t n, size_t *init)
 {
   size_t i, j, *p = *pp;
 
   if(!n) return NULL;
   if(!*pp) {
     p = *pp = malloc(n * sizeof(size_t));
-    for(i = 0; i < n; i++) p[i] = i;
-    return p;
-  } else if(p[0] == SIZE_MAX) {
-    for(i = 0; i < n; i++) p[i] = i;
+    p[0] = SIZE_MAX;
+  }
+  if(p[0] == SIZE_MAX) {
+    if(init) memcpy(p, init, n * sizeof(size_t));
+    else for(i = 0; i < n; i++) p[i] = i;
     return p;
   }
 
+  // find i such that p[i-1] < p[i]
   i = n-1;
-  while(i > 0 && p[i-1] > p[i]) i--;
-  if(!i) return NULL; // end; hit max: 4321
+  while(i > 0 && p[i-1] >= p[i]) i--;
+  if(!i) return NULL; // end; hit max e.g 4,3,2,1
+  // find last j following i-1 where that p[i-1] < p[j]
   for(j = i; j+1 < n && p[i-1] < p[j+1]; j++) {}
 
-  // printf(" i:%zu j:%zu\n", i, j);
+  // printf(" i:%zu j:%zu\n", i-1, j);
   SWAP(p[i-1], p[j]);
   gca_reverse(p+i, n-i, sizeof(p[0]));
 
