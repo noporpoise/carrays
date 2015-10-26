@@ -38,12 +38,12 @@ Reverse the order of elements in an array
     void gca_reverse(void *_ptr, size_t n, size_t es)
 
 Sample m elements by moving them to the front of the array.
-Fisher-Yates shuffle. Initiate srand48() before calling.
+Fisher-Yates shuffle. Initiate `srand48()` before calling.
 
     void gca_sample(void *base, size_t n, size_t es, size_t m)
 
 Shuffle entire array.
-Fisher-Yates shuffle. Initiate srand48() before calling.
+Fisher-Yates shuffle. Initiate `srand48()` before calling.
 
     void gca_shuffle(void *base, size_t n, size_t es)
 
@@ -75,15 +75,15 @@ Naive implementations using three reverses, uses two read/writes per element:
 Iterating over all permutations of an array in order
 
     size_t* gca_itr_reset(size_t *p, size_t n)
-    size_t* gca_itr_next(size_t **pp, size_t n)
+    size_t* gca_itr_next(size_t **pp, size_t n, size_t *init)
 
 Iteration example:
 
     size_t n = 5;
-    int *d = ...;
-    size_t *p = NULL;
+    int *d = ...; // array whose permutations we going to iterate over
+    size_t *p = NULL; // indices
 
-    while(gca_itr_next(&p, n))
+    while(gca_itr_next(&p, n, NULL))
       printf("%i %i %i %i %i", d[p[0]], d[p[1]], d[p[2]], d[p[3]], d[p[4]]);
 
     // Reset and loop over all permutations again
@@ -94,6 +94,26 @@ Iteration example:
       printf("%i %i %i %i %i", d[p[0]], d[p[1]], d[p[2]], d[p[3]], d[p[4]]);
 
     // release iterator memory
+    free(p);
+
+If you have duplicates in your array, you can avoid iterating over duplicate
+permutations by passing an intial indices array, as in the following example:
+
+    size_t n = 5;
+    int *d = ...; // array whose permutations we going to iterate over
+    size_t *p = NULL; // indices
+
+    // Create initial permutation indices, overwrite duplicate's indices
+    size_t *init = malloc(n * sizeof(size_t));
+    for(i = 0; i < n; i++) init[i] = i;
+    init[4] = 2; // d[4] is a duplicate of d[2]
+
+    // Now iterate as normal
+    while(gca_itr_next(&p, n, NULL))
+      printf("%i %i %i %i %i", d[p[0]], d[p[1]], d[p[2]], d[p[3]], d[p[4]]);
+
+    // free indices and initial indices array
+    free(init);
     free(p);
 
 ### Binary search
@@ -203,7 +223,7 @@ Macro for getting median of an array using `gca_qselect()` (Undefined for `nel==
 
 Or the safer wrapper (returns `(type)(zero)` if `nel == 0`):
 
-  #define gca_median2(base,nel,compar,arg,type,avgfunc,zero)
+    gca_median2(base,nel,compar,arg,type,avgfunc,zero)
 
 Get median of array of `int`s:
 
