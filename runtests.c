@@ -321,7 +321,7 @@ void test_heapsort()
 
 #define arrset5(x,a,b,c,d,e) do { x[0]=(a);x[1]=(b);x[2]=(c);x[3]=(d);x[4]=(e); }while(0)
 
-static inline void check_median(size_t *arr, size_t ans)
+static inline void check_median5(size_t *arr, size_t ans)
 {
   size_t i, tmp;
   char *ptr = gca_median5(&arr[0], &arr[1], &arr[2], &arr[3], &arr[4],
@@ -342,19 +342,19 @@ void test_median5()
 
   // 5*4*3*2*1 = 120 perumations
   for(i = 0; gca_itr_next(&itr, 5, NULL); i++)
-    check_median(itr, m);
+    check_median5(itr, m);
 
   TASSERT(i == 5*4*3*2*1);
   free(itr);
 
   for(i = 0; i < 10; i++) {
     arrset5(arr, i, i, i, i, i);
-    check_median(arr, i);
+    check_median5(arr, i);
   }
 
-  arrset5(arr, 10, 0, 10,  0, 10); check_median(arr, 10);
-  arrset5(arr, 1,  9,  9, 10, 10); check_median(arr, 9);
-  arrset5(arr, 10, 10, 9,  8,  7); check_median(arr, 9);
+  arrset5(arr, 10, 0, 10,  0, 10); check_median5(arr, 10);
+  arrset5(arr, 1,  9,  9, 10, 10); check_median5(arr, 9);
+  arrset5(arr, 10, 10, 9,  8,  7); check_median5(arr, 9);
 }
 
 // size_t avgfunc(size_t a, size_t b) {
@@ -374,6 +374,11 @@ void test_median()
   TASSERT(gca_median2(arr, 1, gca_cmp2_size, NULL, size_t, avgfunc, 0) == 1);
   TASSERT(gca_median2(arr, 2, gca_cmp2_size, NULL, size_t, avgfunc, 0) == 3);
   TASSERT(gca_median2(arr, 3, gca_cmp2_size, NULL, size_t, avgfunc, 0) == 4);
+
+  TASSERT(gca_median_size(arr, 0) == 0);
+  TASSERT(gca_median_size(arr, 1) == 1);
+  TASSERT(gca_median_size(arr, 2) == 3);
+  TASSERT(gca_median_size(arr, 3) == 4);
 
   // 7, 7, ... 7, 7
   for(i = 0; i < N; i++) arr[i] = 7;
