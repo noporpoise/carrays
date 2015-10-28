@@ -23,32 +23,32 @@ typedef struct
   const size_t el; // element size in bytes
   size_t start, n, size, mask; // n<=size, mask=size-1
   void *b;
-} CircArray;
+} CircBuf;
 
-static inline void circa_alloc(CircArray *l, size_t el, size_t size) __attribute__((unused));
-static inline void circa_dealloc(CircArray *l) __attribute__((unused));
-static inline void circa_capacity(CircArray *l, size_t s) __attribute__((unused));
-static inline void* circa_push(CircArray *l) __attribute__((unused));
-static inline void* circa_pop(CircArray *l) __attribute__((unused));
-static inline void* circa_unshift(CircArray *l) __attribute__((unused));
-static inline void* circa_shift(CircArray *l) __attribute__((unused));
-static inline void circa_norm(CircArray *l) __attribute__((unused));
+static inline void circa_alloc(CircBuf *l, size_t el, size_t size) __attribute__((unused));
+static inline void circa_dealloc(CircBuf *l) __attribute__((unused));
+static inline void circa_capacity(CircBuf *l, size_t s) __attribute__((unused));
+static inline void* circa_push(CircBuf *l) __attribute__((unused));
+static inline void* circa_pop(CircBuf *l) __attribute__((unused));
+static inline void* circa_unshift(CircBuf *l) __attribute__((unused));
+static inline void* circa_shift(CircBuf *l) __attribute__((unused));
+static inline void circa_norm(CircBuf *l) __attribute__((unused));
 
-static inline void circa_alloc(CircArray *l, size_t el, size_t size)
+static inline void circa_alloc(CircBuf *l, size_t el, size_t size)
 {
   size = roundup64(size);
-  CircArray tmp = {.el = el, .start = 0, .n = 0,
+  CircBuf tmp = {.el = el, .start = 0, .n = 0,
                    .size = size, .mask = size-1,
                    .b = malloc(size * el)};
-  memcpy(l, &tmp, sizeof(CircArray));
+  memcpy(l, &tmp, sizeof(CircBuf));
 }
 
-static inline void circa_dealloc(CircArray *l)
+static inline void circa_dealloc(CircBuf *l)
 {
   free(l->b);
 }
 
-static inline void circa_resize(CircArray *l, size_t size)
+static inline void circa_resize(CircBuf *l, size_t size)
 {
   // resize is only for growing array and new size must be a power of two
   assert(size > l->size && (size & (size-1)) == 0);
@@ -64,7 +64,7 @@ static inline void circa_resize(CircArray *l, size_t size)
   l->mask = size-1;
 }
 
-static inline void circa_capacity(CircArray *l, size_t size)
+static inline void circa_capacity(CircBuf *l, size_t size)
 {
   if(size > l->size) circa_resize(l, roundup64(size));
 }
@@ -74,7 +74,7 @@ static inline void circa_capacity(CircArray *l, size_t size)
 
 // Add to start
 // Returns a pointer to the item added (zero'd)
-static inline void* circa_push(CircArray *l)
+static inline void* circa_push(CircBuf *l)
 {
   if(l->n == l->size) circa_resize(l, l->size*2);
   l->start = l->start ? l->start-1 : l->size-1;
@@ -86,7 +86,7 @@ static inline void* circa_push(CircArray *l)
 
 // Remove from start
 // Returns a pointer to the item removed
-static inline void* circa_pop(CircArray *l)
+static inline void* circa_pop(CircBuf *l)
 {
   assert(l->n > 0);
   size_t old = l->start;
@@ -97,7 +97,7 @@ static inline void* circa_pop(CircArray *l)
 
 // Add to end
 // Returns a pointer to the item added (zero'd)
-static inline void* circa_unshift(CircArray *l)
+static inline void* circa_unshift(CircBuf *l)
 {
   if(l->n == l->size) circa_resize(l, l->size*2);
   void *ptr = circa_get(l, l->n);
@@ -108,7 +108,7 @@ static inline void* circa_unshift(CircArray *l)
 
 // Remove from end
 // Returns a pointer to the item removed
-static inline void* circa_shift(CircArray *l)
+static inline void* circa_shift(CircBuf *l)
 {
   assert(l->n > 0);
   void *ptr = circa_get(l, l->n);
@@ -117,7 +117,7 @@ static inline void* circa_shift(CircArray *l)
 }
 
 // Stop circular array from wrapping around
-static inline void circa_norm(CircArray *l)
+static inline void circa_norm(CircBuf *l)
 {
   size_t newstart, nright, nleft;
   if(l->start + l->n > l->size) {
