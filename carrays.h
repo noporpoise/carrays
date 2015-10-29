@@ -48,13 +48,18 @@ static inline int fname2(const void *aa, const void *bb, void *p) {            \
   const type_t b = *(const type_t *)bb;                                        \
   return cmp(a, b);                                                            \
 }
+cmpfunc(gca_cmp_char,    gca_cmp2_char,    char,        gca_cmp);
 cmpfunc(gca_cmp_int,     gca_cmp2_int,     int,         gca_cmp);
 cmpfunc(gca_cmp_long,    gca_cmp2_long,    long,        gca_cmp);
 cmpfunc(gca_cmp_float,   gca_cmp2_float,   float,       gca_cmp);
 cmpfunc(gca_cmp_double,  gca_cmp2_double,  double,      gca_cmp);
+cmpfunc(gca_cmp_int8,    gca_cmp2_int8,    int8_t,      gca_cmp);
+cmpfunc(gca_cmp_int16,   gca_cmp2_int16,   int16_t,     gca_cmp);
 cmpfunc(gca_cmp_int32,   gca_cmp2_int32,   int32_t,     gca_cmp);
-cmpfunc(gca_cmp_uint32,  gca_cmp2_uint32,  uint32_t,    gca_cmp);
 cmpfunc(gca_cmp_int64,   gca_cmp2_int64,   int64_t,     gca_cmp);
+cmpfunc(gca_cmp_uint8,   gca_cmp2_uint8,   uint8_t,     gca_cmp);
+cmpfunc(gca_cmp_uint16,  gca_cmp2_uint16,  uint16_t,    gca_cmp);
+cmpfunc(gca_cmp_uint32,  gca_cmp2_uint32,  uint32_t,    gca_cmp);
 cmpfunc(gca_cmp_uint64,  gca_cmp2_uint64,  uint64_t,    gca_cmp);
 cmpfunc(gca_cmp_size,    gca_cmp2_size,    size_t,      gca_cmp);
 cmpfunc(gca_cmp_ptr,     gca_cmp2_ptr,     void *const, gca_cmp);
@@ -69,13 +74,18 @@ static inline int fname(const void *aa, void *bb) {                            \
   const type_t b = *(type_t *)bb;                                              \
   return cmp(a, b);                                                            \
 }
+searchfunc(gca_search_char,    char,        gca_cmp);
 searchfunc(gca_search_int,     int,         gca_cmp);
 searchfunc(gca_search_long,    long,        gca_cmp);
 searchfunc(gca_search_float,   float,       gca_cmp);
 searchfunc(gca_search_double,  double,      gca_cmp);
+searchfunc(gca_search_int8,    int8_t,      gca_cmp);
+searchfunc(gca_search_int16,   int16_t,     gca_cmp);
 searchfunc(gca_search_int32,   int32_t,     gca_cmp);
-searchfunc(gca_search_uint32,  uint32_t,    gca_cmp);
 searchfunc(gca_search_int64,   int64_t,     gca_cmp);
+searchfunc(gca_search_uint8,   uint8_t,     gca_cmp);
+searchfunc(gca_search_uint16,  uint16_t,    gca_cmp);
+searchfunc(gca_search_uint32,  uint32_t,    gca_cmp);
 searchfunc(gca_search_uint64,  uint64_t,    gca_cmp);
 searchfunc(gca_search_size,    size_t,      gca_cmp);
 searchfunc(gca_search_ptr,     void *const, gca_cmp);

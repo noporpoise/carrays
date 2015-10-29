@@ -126,26 +126,37 @@ searching for. Given a target we are searching for, it returns:
 - `0` if `_val` is equal to the target
 - `>0` if `_val` is greater than the target
 
-Call:
+Binary search (time: `O(ln N)`):
 
     void* gca_bsearch(void *_ptr, size_t n, size_t es,
                       int (*searchf)(const void *_val, void *_arg),
                       void *arg)
 
-Example usage for `int`s:
+Linear search (time: `O(N)`):
+
+    void* gca_lsearch(void *_ptr, size_t n, size_t es,
+                      int (*searchf)(const void *_val, void *_arg),
+                      void *arg)
+
+Example search usage for `int` array:
 
     int n = 10, arr = {...}, find = 5;
     int *found = gca_bsearch(arr, n, sizeof(int), gca_search_int, &find);
 
 The following search functions are provided:
 
+    int gca_search_char(const void *_val, void *_arg)
     int gca_search_int(const void *_val, void *_arg)
     int gca_search_long(const void *_val, void *_arg)
     int gca_search_float(const void *_val, void *_arg)
     int gca_search_double(const void *_val, void *_arg)
+    int gca_search_int8(const void *_val, void *_arg)
+    int gca_search_int16(const void *_val, void *_arg)
     int gca_search_int32(const void *_val, void *_arg)
-    int gca_search_uint32(const void *_val, void *_arg)
     int gca_search_int64(const void *_val, void *_arg)
+    int gca_search_uint8(const void *_val, void *_arg)
+    int gca_search_uint16(const void *_val, void *_arg)
+    int gca_search_uint32(const void *_val, void *_arg)
     int gca_search_uint64(const void *_val, void *_arg)
     int gca_search_size(const void *_val, void *_arg)
     int gca_search_ptr(const void *_val, void *_arg)
@@ -155,13 +166,18 @@ The following search functions are provided:
 
 The following comparion functions are provided:
 
+    int gca_cmp_char(const void *a, const void *b)
     int gca_cmp_int(const void *a, const void *b)
     int gca_cmp_long(const void *a, const void *b)
     int gca_cmp_float(const void *a, const void *b)
     int gca_cmp_double(const void *a, const void *b)
+    int gca_cmp_int8(const void *a, const void *b)
+    int gca_cmp_int16(const void *a, const void *b)
     int gca_cmp_int32(const void *a, const void *b)
-    int gca_cmp_uint32(const void *a, const void *b)
     int gca_cmp_int64(const void *a, const void *b)
+    int gca_cmp_uint8(const void *a, const void *b)
+    int gca_cmp_uint16(const void *a, const void *b)
+    int gca_cmp_uint32(const void *a, const void *b)
     int gca_cmp_uint64(const void *a, const void *b)
     int gca_cmp_size(const void *a, const void *b)
     int gca_cmp_ptr(const void *a, const void *b)
@@ -169,13 +185,18 @@ The following comparion functions are provided:
 
 And comparison functions that take and ignore the extra parameter:
 
+    int gca_cmp2_char(const void *a, const void *b, void *_arg)
     int gca_cmp2_int(const void *a, const void *b, void *_arg)
     int gca_cmp2_long(const void *a, const void *b, void *_arg)
     int gca_cmp2_float(const void *a, const void *b, void *_arg)
     int gca_cmp2_double(const void *a, const void *b, void *_arg)
+    int gca_cmp2_int8(const void *a, const void *b, void *_arg)
+    int gca_cmp2_int16(const void *a, const void *b, void *_arg)
     int gca_cmp2_int32(const void *a, const void *b, void *_arg)
-    int gca_cmp2_uint32(const void *a, const void *b, void *_arg)
     int gca_cmp2_int64(const void *a, const void *b, void *_arg)
+    int gca_cmp2_uint8(const void *a, const void *b, void *_arg)
+    int gca_cmp2_uint16(const void *a, const void *b, void *_arg)
+    int gca_cmp2_uint32(const void *a, const void *b, void *_arg)
     int gca_cmp2_uint64(const void *a, const void *b, void *_arg)
     int gca_cmp2_size(const void *a, const void *b, void *_arg)
     int gca_cmp2_ptr(const void *a, const void *b, void *_arg)
