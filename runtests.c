@@ -166,20 +166,23 @@ void test_bsearch()
 
   #define N 100
   size_t idx;
-  int i, n, find, arr[N], *found;
+  int i, n, find, arr[N], *foundb, *foundl;
   for(i = 0; i < N; i++) arr[i] = i;
 
   find = 20;
-  found = gca_bsearch(arr, N, sizeof(arr[0]), gca_search_int, &find);
-  idx = found-arr;
+  foundb = gca_bsearch(arr, N, sizeof(arr[0]), gca_search_int, &find);
+  foundl = gca_lsearch(arr, N, sizeof(arr[0]), gca_search_int, &find);
+  idx = foundb-arr;
 
-  TASSERT(found == &arr[find]);
+  TASSERT(foundb == &arr[find]);
   TASSERT(idx == (size_t)find);
 
   for(n = 0; n <= N; n++) {
     for(find = -2; find <= n+2; find++) {
-      found = gca_bsearch(arr, n, sizeof(arr[0]), gca_search_int, &find);
-      TASSERT(found == (find < 0 || find >= n ? NULL : &arr[find]));
+      foundb = gca_bsearch(arr, n, sizeof(arr[0]), gca_search_int, &find);
+      TASSERT(foundb == (find < 0 || find >= n ? NULL : &arr[find]));
+      foundl = gca_lsearch(arr, n, sizeof(arr[0]), gca_search_int, &find);
+      TASSERT(foundb == foundl);
     }
   }
   #undef N

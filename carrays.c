@@ -135,19 +135,39 @@ void* gca_bsearch(void *_ptr, size_t n, size_t es,
 {
   if(n == 0) return NULL;
 
-  char *ptr = (char*)_ptr;
-  char *a = ptr, *b = ptr + es*(n-1), *mid;
+  char *ptr = (char*)_ptr, *mptr;
+  size_t l = 0, r = n-1, mid;
   int cmp;
 
-  while(a <= b)
+  while(1)
   {
-    mid = ptr + es * (((a-ptr) + (b-ptr)) / (2*es));
-    cmp = searchf(mid, arg);
-    if(cmp > 0) b = mid - es;
-    else if(cmp < 0) a = mid + es;
-    else return mid;
+    // find mid without overflow
+    mid = l/2 + r/2 + (l & r & (size_t)1);
+    mptr = ptr+es*mid;
+    cmp = searchf(mptr, arg);
+    if(cmp == 0) return mptr;
+    else if(cmp > 0) {
+      if(!mid) return NULL;
+      r = mid-1;
+    }
+    else if(cmp < 0) {
+      if(mid+1 == n) return NULL;
+      l = mid+1;
+    }
   }
 
+  return NULL;
+}
+
+// Linear search
+void* gca_lsearch(void *base, size_t n, size_t es,
+                  int (*searchf)(const void *_val, void *_arg),
+                  void *arg)
+{
+  char *b = (char*)base, *end = b+es*n;
+  for(; b < end; b++)
+    if(searchf(b,arg) == 0)
+      return b;
   return NULL;
 }
 

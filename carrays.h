@@ -148,6 +148,11 @@ void* gca_bsearch(void *_ptr, size_t n, size_t es,
                   int (*searchf)(const void *_val, void *_arg),
                   void *arg);
 
+// Linear search
+void* gca_lsearch(void *_ptr, size_t n, size_t es,
+                  int (*searchf)(const void *_val, void *_arg),
+                  void *arg);
+
 //
 // Quick sort
 //
