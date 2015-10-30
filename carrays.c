@@ -142,7 +142,7 @@ void* gca_bsearch(void *_ptr, size_t n, size_t es,
   while(1)
   {
     // find mid without overflow
-    mid = l/2 + r/2 + (l & r & (size_t)1);
+    mid = l + (r - l)/2;
     mptr = ptr+es*mid;
     cmp = searchf(mptr, arg);
     if(cmp == 0) return mptr;
