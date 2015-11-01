@@ -488,6 +488,8 @@ void test_next_perm_with_dupes()
   TASSERT(gca_itr_next(&p, 5, init) == NULL);
   TASSERT(gca_itr_reset(p, 5) == p && p != NULL);
   check_permutation5(&p,1,1,1,1,7,init);
+
+  free(p);
 }
 
 void test_next_permutation()
