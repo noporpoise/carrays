@@ -1,3 +1,4 @@
+#include <stdlib.h> // drand48()
 #include <string.h>
 #include <assert.h>
 #include "carrays.h"
