@@ -26,6 +26,24 @@ static inline uint64_t gca_roundup64(uint64_t x) {
   #define SWAP(x,y) do { __typeof(x) _tmp = (x); (x) = (y); (y) = _tmp; } while(0)
 #endif
 
+// Resize an array only if needed
+// If resized new number of elements is power of two
+// New elements are initialised to zero
+static inline void* gca_capacity(void *ptr, size_t *size, size_t es,
+                                 size_t new_size)
+{
+  if(new_size > *size) {
+    new_size = gca_roundup64(new_size);
+    if((ptr = realloc(ptr, new_size * es)) == NULL) return NULL;
+    memset(ptr+es*(*size), 0, es*(new_size - *size));
+    *size = new_size;
+  }
+  return ptr;
+}
+
+#define gca_resize(b, n, new_n) \
+  do { (b) = gca_capacity(b, &(n), sizeof((b)[0]), (new_n)); } while(0)
+
 // comparison returns:
 //   negative iff a < b
 //          0 iff a == b
