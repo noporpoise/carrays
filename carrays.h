@@ -35,7 +35,7 @@ static inline void* gca_capacity(void *ptr, size_t *size, size_t es,
   if(new_size > *size) {
     new_size = gca_roundup64(new_size);
     if((ptr = realloc(ptr, new_size * es)) == NULL) return NULL;
-    memset(ptr+es*(*size), 0, es*(new_size - *size));
+    memset((char*)ptr+es*(*size), 0, es*(new_size - *size));
     *size = new_size;
   }
   return ptr;
