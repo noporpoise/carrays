@@ -227,11 +227,13 @@ void* gca_qselect(void *base, size_t nel, size_t es, size_t kidx,
 #define gca_ab_mean_int(a,b) (((a)+(b)+1)/2)
 #define gca_ab_mean_real(a,b) ((a)/2+(b)/2)
 
-#define gca_median_int(base,nel) gca_median2(base,nel,gca_cmp2_int,NULL,int,gca_ab_mean_int,0)
-#define gca_median_long(base,nel) gca_median2(base,nel,gca_cmp2_long,NULL,long,gca_ab_mean_int,0)
-#define gca_median_size(base,nel) gca_median2(base,nel,gca_cmp2_size,NULL,size_t,gca_ab_mean_int,0)
-#define gca_median_float(base,nel) gca_median2(base,nel,gca_cmp2_float,NULL,float,gca_ab_mean_real,0.0)
-#define gca_median_double(base,nel) gca_median2(base,nel,gca_cmp2_double,NULL,double,gca_ab_mean_real,0.0)
+#define gca_median_uint32(base,nel) gca_median2(base,nel,gca_cmp2_uint32,NULL,uint32_t,gca_ab_mean_int,0)
+#define gca_median_uint64(base,nel) gca_median2(base,nel,gca_cmp2_uint64,NULL,uint64_t,gca_ab_mean_int,0)
+#define gca_median_int(base,nel)    gca_median2(base,nel,gca_cmp2_int,   NULL,int,     gca_ab_mean_int,0)
+#define gca_median_long(base,nel)   gca_median2(base,nel,gca_cmp2_long,  NULL,long,    gca_ab_mean_int,0)
+#define gca_median_size(base,nel)   gca_median2(base,nel,gca_cmp2_size,  NULL,size_t,  gca_ab_mean_int,0)
+#define gca_median_float(base,nel)  gca_median2(base,nel,gca_cmp2_float, NULL,float,   gca_ab_mean_real,0.0)
+#define gca_median_double(base,nel) gca_median2(base,nel,gca_cmp2_double,NULL,double,  gca_ab_mean_real,0.0)
 
 //
 // Heapsort
