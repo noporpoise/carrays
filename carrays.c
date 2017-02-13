@@ -1,3 +1,4 @@
+#define _XOPEN_SOURCE /* drand48() */
 #include <stdlib.h> // drand48()
 #include <string.h>
 #include <assert.h>
